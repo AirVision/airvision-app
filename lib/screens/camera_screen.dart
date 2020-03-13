@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class CameraScreen extends StatefulWidget {
+  static const String id = 'camera_screen';
+
   @override
   _CameraScreenState createState() => _CameraScreenState();
 }
@@ -10,7 +12,7 @@ class _CameraScreenState extends State<CameraScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        child: SafeArea(child: Text("test")),
+        child: SafeArea(child: Center(child: Text("Camera"))),
       ),
     );
   }

@@ -13,11 +13,11 @@ class AirVision extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      initialRoute: '/',
+      initialRoute: MapScreen.id,
       routes: {
-        '/': (context) => MapScreen(),
-        '/camera': (context) => CameraScreen(),
-        '/settings': (context) => SettingsScreen(),
+        MapScreen.id: (context) => MapScreen(),
+        CameraScreen.id: (context) => CameraScreen(),
+        SettingsScreen.id: (context) => SettingsScreen(),
       },
     );
   }
