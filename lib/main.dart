@@ -1,4 +1,5 @@
 import 'package:air_vision/screens/camera_screen.dart';
+import 'package:air_vision/screens/leaderboard_screen.dart';
 import 'package:air_vision/screens/map_screen.dart';
 import 'package:air_vision/screens/settings_screen.dart';
 import 'package:flutter/material.dart';
@@ -11,13 +12,15 @@ class AirVision extends StatelessWidget {
     return MaterialApp(
       title: 'Air Vision',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primaryColor: Color(0xFF3496F7),
+        accentColor: Color(0xFF3496F7)
       ),
       initialRoute: MapScreen.id,
       routes: {
         MapScreen.id: (context) => MapScreen(),
         CameraScreen.id: (context) => CameraScreen(),
         SettingsScreen.id: (context) => SettingsScreen(),
+        LeaderBoardScreen.id: (context) => LeaderBoardScreen()
       },
     );
   }
