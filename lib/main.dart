@@ -1,5 +1,5 @@
 import 'package:air_vision/screens/camera_screen.dart';
-import 'package:air_vision/screens/leaderboard_screen.dart';
+import 'package:air_vision/screens/debug_screen.dart';
 import 'package:air_vision/screens/map_screen.dart';
 import 'package:air_vision/screens/settings_screen.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +20,7 @@ class AirVision extends StatelessWidget {
         MapScreen.id: (context) => MapScreen(),
         CameraScreen.id: (context) => CameraScreen(),
         SettingsScreen.id: (context) => SettingsScreen(),
-        LeaderBoardScreen.id: (context) => LeaderBoardScreen()
+        DebugScreen.id: (context) => DebugScreen()
       },
     );
   }

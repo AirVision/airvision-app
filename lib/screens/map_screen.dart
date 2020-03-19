@@ -1,5 +1,5 @@
 import 'package:air_vision/screens/camera_screen.dart';
-import 'package:air_vision/screens/leaderboard_screen.dart';
+import 'package:air_vision/screens/debug_screen.dart';
 import 'package:air_vision/screens/settings_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -50,7 +50,7 @@ class _MapScreenState extends State<MapScreen> {
                   ],
                 ),
                 onPressed: () {
-                  Navigator.pushNamed(context, LeaderBoardScreen.id);
+                  Navigator.pushNamed(context, DebugScreen.id);
                 },
               ),
             ],

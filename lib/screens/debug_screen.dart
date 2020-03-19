@@ -1,43 +1,84 @@
-import 'package:air_vision/services/location.dart';
+import 'dart:async';
+
+import 'package:air_vision/services/location_service.dart';
+import 'package:air_vision/services/time_service.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:location/location.dart';
+import 'package:sensors/sensors.dart';
 
-class LeaderBoardScreen extends StatefulWidget {
+class DebugScreen extends StatefulWidget {
   static const String id = 'leaderboard_screen';
 
   @override
-  _LeaderBoardScreenState createState() => _LeaderBoardScreenState();
+  _DebugScreenState createState() => _DebugScreenState();
 }
 
-class _LeaderBoardScreenState extends State<LeaderBoardScreen> {
+class _DebugScreenState extends State<DebugScreen> {
   double lat = -0;
   double lon = -0;
-
   double x;
   double y;
   double z;
+  String _timeString;
+  LocationData _location;
+  List<double> _gyroscopeValues;
+  List<StreamSubscription<dynamic>> _streamSubscriptions =
+      <StreamSubscription<dynamic>>[];
+  final Location location = Location();
 
-  LocationService locationService = LocationService();
+  final TimeService _timeService = TimeService();
 
-  @override
-  void initState() {
-    super.initState();
-    getLocation();
-  }
+  StreamSubscription<LocationData> _locationSubscription;
+  LocationService _locationService = LocationService();
 
-  void getLocation() async {
-    LocationData location = await locationService.getLocation();
-    // print(location);
-    setState(() {
-      lat = location.latitude;
-      lon = location.longitude;
+  _listenLocation() async {
+    _locationSubscription = location.onLocationChanged().handleError((err) {
+      setState(() {});
+      _locationSubscription.cancel();
+    }).listen((LocationData currentLocation) {
+      setState(() {
+        _location = currentLocation;
+        lat = _location.latitude;
+        lon = _location.longitude;
+      });
     });
   }
 
   @override
+  void initState() {
+    _streamSubscriptions.add(gyroscopeEvents.listen((GyroscopeEvent event) {
+      setState(() {
+        _gyroscopeValues = <double>[event.x, event.y, event.z];
+      });
+    }));
+    _listenLocation();
+    _timeString =
+        "${DateTime.now().hour}:${DateTime.now().minute}:${DateTime.now().second}";
+    Timer.periodic(Duration(seconds: 1), (Timer t) => _updateTime());
+    super.initState();
+  }
+
+  void _updateTime() {
+    setState(() {
+      _timeString = _timeService.getCurrentTime();
+    });
+  }
+
+  @override
+  void dispose() {
+    for (StreamSubscription<dynamic> subscription in _streamSubscriptions) {
+      subscription.cancel();
+    }
+    _locationService.stopListen();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    var now = new DateTime.now();
+    final List<String> gyroscope =
+        _gyroscopeValues?.map((double v) => v.toStringAsFixed(1))?.toList();
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -67,7 +108,7 @@ class _LeaderBoardScreenState extends State<LeaderBoardScreen> {
                     SizedBox(
                       width: 20.0,
                     ),
-                    Text(now.toString()),
+                    Text(_timeString),
                   ],
                 ),
               ),
@@ -99,15 +140,15 @@ class _LeaderBoardScreenState extends State<LeaderBoardScreen> {
                     SizedBox(
                       width: 20.0,
                     ),
-                    Text('x: ${lat.toStringAsFixed(2)}'),
+                    Text('x: ${gyroscope[0]}'),
                     SizedBox(
                       width: 20.0,
                     ),
-                    Text('y: ${lon.toStringAsFixed(2)}'),
+                    Text('y: ${gyroscope[1]}'),
                     SizedBox(
                       width: 20.0,
                     ),
-                    Text('z: ${lon.toStringAsFixed(2)}'),
+                    Text('z: ${gyroscope[2]}'),
                   ],
                 ),
               ),
