@@ -17,20 +17,18 @@ class DebugScreen extends StatefulWidget {
 class _DebugScreenState extends State<DebugScreen> {
   double lat = -0;
   double lon = -0;
-  double x;
-  double y;
-  double z;
+  double x = 0;
+  double y = 0;
+  double z = 0;
+  Timer _timer;
   String _timeString;
   LocationData _location;
-  List<double> _gyroscopeValues;
-  List<StreamSubscription<dynamic>> _streamSubscriptions =
-      <StreamSubscription<dynamic>>[];
   final Location location = Location();
 
   final TimeService _timeService = TimeService();
 
+  StreamSubscription<GyroscopeEvent> _gyroSubscription;
   StreamSubscription<LocationData> _locationSubscription;
-  LocationService _locationService = LocationService();
 
   _listenLocation() async {
     _locationSubscription = location.onLocationChanged().handleError((err) {
@@ -47,15 +45,19 @@ class _DebugScreenState extends State<DebugScreen> {
 
   @override
   void initState() {
-    _streamSubscriptions.add(gyroscopeEvents.listen((GyroscopeEvent event) {
-      setState(() {
-        _gyroscopeValues = <double>[event.x, event.y, event.z];
-      });
-    }));
-    _listenLocation();
     _timeString =
         "${DateTime.now().hour}:${DateTime.now().minute}:${DateTime.now().second}";
-    Timer.periodic(Duration(seconds: 1), (Timer t) => _updateTime());
+    if (mounted) {
+      _timer = Timer.periodic(Duration(seconds: 1), (Timer t) => _updateTime());
+      _gyroSubscription = gyroscopeEvents.listen((GyroscopeEvent event) {
+        setState(() {
+          x = event.x;
+          y = event.y;
+          z = event.y;
+        });
+      });
+      _listenLocation();
+    }
     super.initState();
   }
 
@@ -67,18 +69,14 @@ class _DebugScreenState extends State<DebugScreen> {
 
   @override
   void dispose() {
-    for (StreamSubscription<dynamic> subscription in _streamSubscriptions) {
-      subscription.cancel();
-    }
-    _locationService.stopListen();
     super.dispose();
+    _timer.cancel();
+    _gyroSubscription.cancel();
+    _locationSubscription.cancel();
   }
 
   @override
   Widget build(BuildContext context) {
-    final List<String> gyroscope =
-        _gyroscopeValues?.map((double v) => v.toStringAsFixed(1))?.toList();
-
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -140,15 +138,15 @@ class _DebugScreenState extends State<DebugScreen> {
                     SizedBox(
                       width: 20.0,
                     ),
-                    Text('x: ${gyroscope[0]}'),
+                    Text('x: ${x.toStringAsFixed(1)}'),
                     SizedBox(
                       width: 20.0,
                     ),
-                    Text('y: ${gyroscope[1]}'),
+                    Text('y: ${y.toStringAsFixed(1)}'),
                     SizedBox(
                       width: 20.0,
                     ),
-                    Text('z: ${gyroscope[2]}'),
+                    Text('z: ${z.toStringAsFixed(1)}'),
                   ],
                 ),
               ),
