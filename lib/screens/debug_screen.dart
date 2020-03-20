@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:air_vision/services/location_service.dart';
 import 'package:air_vision/services/time_service.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -81,7 +80,7 @@ class _DebugScreenState extends State<DebugScreen> {
       appBar: AppBar(
         title: Text(
           'Debug',
-          style: TextStyle(color: Colors.black),
+          style: TextStyle(color: Colors.black87),
         ),
         centerTitle: true,
         shape: RoundedRectangleBorder(
