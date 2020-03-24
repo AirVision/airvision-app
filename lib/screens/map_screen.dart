@@ -22,10 +22,7 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   Completer<GoogleMapController> _controller = Completer();
-
-  //For custom icons
-  BitmapDescriptor sourceIcon;
-  BitmapDescriptor destinationIcon;
+  String _mapStyle;
   // the user's initial location and current location
   LocationData currentLocation;
   // wrapper around the location API
@@ -38,6 +35,9 @@ class _MapScreenState extends State<MapScreen> {
     location.onLocationChanged().listen((LocationData cLoc) {
       currentLocation = cLoc;
       updatePinOnMap();
+    });
+    rootBundle.loadString('assets/mapStyle.txt').then((string) {
+      _mapStyle = string;
     });
     setInitialLocation();
   }
@@ -149,6 +149,7 @@ class _MapScreenState extends State<MapScreen> {
               mapType: MapType.normal,
               initialCameraPosition: initialCameraPosition,
               onMapCreated: (GoogleMapController controller) {
+                controller.setMapStyle(_mapStyle);
                 _controller.complete(controller);
               })
         ],
