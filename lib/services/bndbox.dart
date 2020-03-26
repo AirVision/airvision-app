@@ -15,7 +15,7 @@ class BndBox extends StatelessWidget {
   Widget build(BuildContext context) {
     List<Widget> _renderBoxes() {
       return results.map((re) {
-        if ((re["confidenceInClass"] * 100) > 70) {
+        if ((re["confidenceInClass"] * 100) > 55) {
           var _x = re["rect"]["x"];
           var _w = re["rect"]["w"];
           var _y = re["rect"]["y"];
@@ -66,20 +66,7 @@ class BndBox extends StatelessWidget {
             ),
           );
         } else {
-          return Positioned(
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: Padding(
-                padding: const EdgeInsets.only(bottom : 50.0),
-                child: Container(
-                  color: Color(0xff3496F7),
-                  child: Row(
-                    children: <Widget>[
-                      Icon(Icons.info, color: Colors.white,),
-                      Text("Search aircraft", style: TextStyle(color: Colors.white),),
-                    ],
-                  )),
-              )));
+          return Container();
         }
       }).toList();
     }

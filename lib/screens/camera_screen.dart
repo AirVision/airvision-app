@@ -18,15 +18,17 @@ class _CameraScreenState extends State<CameraScreen> {
   List<dynamic> _recognitions;
   int _imageHeight = 0;
   int _imageWidth = 0;
-  // Callback setRecognitions;
   String _model = yolo;
 
   CameraController controller;
   double scale = 1.0;
   bool isDetecting = false;
+  bool modalIsOpen = false;
+  bool detectedAirplane = false;
+  String text = "";
 
   loadModel() async {
-    String res = await Tflite.loadModel(
+    await Tflite.loadModel(
         model: "assets/yolov2_tiny.tflite",
         labels: "assets/yolov2_tiny.txt",
         numThreads: 1);
@@ -44,7 +46,6 @@ class _CameraScreenState extends State<CameraScreen> {
       controller.startImageStream((CameraImage img) {
         if (!isDetecting) {
           isDetecting = true;
-          int startTime = new DateTime.now().millisecondsSinceEpoch;
           Tflite.detectObjectOnFrame(
             bytesList: img.planes.map((plane) {
               return plane.bytes;
@@ -57,8 +58,8 @@ class _CameraScreenState extends State<CameraScreen> {
             numResultsPerClass: 1,
             threshold: _model == yolo ? 0.2 : 0.4,
           ).then((recognitions) {
-            int endTime = new DateTime.now().millisecondsSinceEpoch;
-            print("Detection took ${endTime - startTime}");
+            // int endTime = new DateTime.now().millisecondsSinceEpoch;
+            // print("Detection took ${endTime - startTime}");
             updateRecognitions(recognitions, img.height, img.width);
             isDetecting = false;
           });
@@ -67,11 +68,52 @@ class _CameraScreenState extends State<CameraScreen> {
     });
   }
 
-  updateRecognitions(recognitions, h, w) {
+  scanAirplane(h, w, sh, sw) {
+    if (!modalIsOpen) {
+      modalIsOpen = true;
+      showModalBottomSheet(
+          context: context,
+          builder: (context) {
+            return Column(
+              children: <Widget>[
+                ListTile(
+                  leading: Icon(Icons.airplanemode_active),
+                  title: Text("Airbus A220"),
+                ),
+                ListTile(
+                  leading: Icon(Icons.airplanemode_active),
+                  title: Text("Airbus A220"),
+                ),
+                ListTile(
+                  leading: Icon(Icons.airplanemode_active),
+                  title: Text("Airbus A220"),
+                ),
+                ListTile(
+                  leading: Icon(Icons.airplanemode_active),
+                  title: Text("Airbus A220"),
+                ),
+                ListTile(
+                  leading: Icon(Icons.airplanemode_active),
+                  title: Text("Airbus A220"),
+                ),
+              ],
+            );
+          }).whenComplete(() {
+        modalIsOpen = false;
+      });
+    }
+  }
+
+  updateRecognitions(List recognitions, h, w) {
     setState(() {
       _recognitions = recognitions;
       _imageHeight = h;
       _imageWidth = w;
+      if (recognitions != null && recognitions.length > 0)
+        text = recognitions[0]["detectedClass"];
+      else {
+        text = "Find Aircraft";
+      }
     });
   }
 
@@ -134,7 +176,49 @@ class _CameraScreenState extends State<CameraScreen> {
                     math.max(_imageHeight, _imageWidth),
                     math.min(_imageHeight, _imageWidth),
                     screen.height,
-                    screen.width)
+                    screen.width),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 40.0),
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Opacity(
+                      opacity: text == "aircraft" ? 1.0 : 0.8,
+                      child: GestureDetector(
+                        onTap: () {
+                          if(text == "aircraft")
+                            scanAirplane(
+                                math.max(_imageHeight, _imageWidth),
+                                math.min(_imageHeight, _imageWidth),
+                                screen.height,
+                                screen.width);
+                        },
+                        child: Container(
+                          width: 180.0,
+                          height: 50.0,
+                          decoration: BoxDecoration(
+                              color: Color(0xff3496F7),
+                              borderRadius: BorderRadius.circular(20.0)),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Icon(
+                                Icons.info_outline,
+                                color: Colors.white,
+                              ),
+                              SizedBox(
+                                width: 5.0,
+                              ),
+                              Text(
+                                text,
+                                style: TextStyle(color: Colors.white),
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                )
               ],
             ),
           )

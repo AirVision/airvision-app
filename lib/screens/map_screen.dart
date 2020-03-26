@@ -99,7 +99,35 @@ class _MapScreenState extends State<MapScreen> {
                   ],
                 ),
                 onPressed: () {
-                  Navigator.pushNamed(context, SettingsScreen.id);
+                  // Navigator.pushNamed(context, SettingsScreen.id);
+                  showModalBottomSheet(
+                      context: context,
+                      builder: (context) {
+                        return Column(
+                          children: <Widget>[
+                            ListTile(
+                              leading: Icon(Icons.airplanemode_active),
+                              title: Text("Airbus A220"),
+                            ),
+                            ListTile(
+                              leading: Icon(Icons.airplanemode_active),
+                              title: Text("Airbus A220"),
+                            ),
+                            ListTile(
+                              leading: Icon(Icons.airplanemode_active),
+                              title: Text("Airbus A220"),
+                            ),
+                            ListTile(
+                              leading: Icon(Icons.airplanemode_active),
+                              title: Text("Airbus A220"),
+                            ),
+                            ListTile(
+                              leading: Icon(Icons.airplanemode_active),
+                              title: Text("Airbus A220"),
+                            ),
+                          ],
+                        );
+                      });
                 },
               ),
               SizedBox(),
@@ -141,17 +169,17 @@ class _MapScreenState extends State<MapScreen> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       body: Stack(
         children: <Widget>[
-          GoogleMap(
-              myLocationEnabled: true,
-              myLocationButtonEnabled: false,
-              compassEnabled: false,
-              tiltGesturesEnabled: false,
-              mapType: MapType.normal,
-              initialCameraPosition: initialCameraPosition,
-              onMapCreated: (GoogleMapController controller) {
-                controller.setMapStyle(_mapStyle);
-                _controller.complete(controller);
-              })
+          // GoogleMap(
+          //     myLocationEnabled: true,
+          //     myLocationButtonEnabled: false,
+          //     compassEnabled: false,
+          //     tiltGesturesEnabled: false,
+          //     mapType: MapType.normal,
+          //     initialCameraPosition: initialCameraPosition,
+          //     onMapCreated: (GoogleMapController controller) {
+          //       controller.setMapStyle(_mapStyle);
+          //       _controller.complete(controller);
+          //     })
         ],
       ),
     );
