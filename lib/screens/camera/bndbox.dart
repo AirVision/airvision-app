@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
+//This service draws the rectangles around the detected aircrafts.
+
 class BndBox extends StatelessWidget {
   final List<dynamic> results;
   final int previewH;
@@ -15,7 +17,7 @@ class BndBox extends StatelessWidget {
   Widget build(BuildContext context) {
     List<Widget> _renderBoxes() {
       return results.map((re) {
-        if ((re["confidenceInClass"] * 100) > 55) {
+        if ((re["confidenceInClass"] * 100) > 55 && re["detectedClass"] == "aircraft") {
           var _x = re["rect"]["x"];
           var _w = re["rect"]["w"];
           var _y = re["rect"]["y"];

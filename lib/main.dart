@@ -1,4 +1,4 @@
-import 'package:air_vision/screens/camera_screen.dart';
+import 'package:air_vision/screens/camera/camera_screen.dart';
 import 'package:air_vision/screens/debug_screen.dart';
 import 'package:air_vision/screens/map_screen.dart';
 import 'package:air_vision/screens/settings_screen.dart';

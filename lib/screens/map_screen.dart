@@ -1,4 +1,4 @@
-import 'package:air_vision/screens/camera_screen.dart';
+import 'package:air_vision/screens/camera/camera_screen.dart';
 import 'package:air_vision/screens/debug_screen.dart';
 import 'package:air_vision/screens/settings_screen.dart';
 import 'package:flutter/material.dart';
@@ -99,35 +99,7 @@ class _MapScreenState extends State<MapScreen> {
                   ],
                 ),
                 onPressed: () {
-                  // Navigator.pushNamed(context, SettingsScreen.id);
-                  showModalBottomSheet(
-                      context: context,
-                      builder: (context) {
-                        return Column(
-                          children: <Widget>[
-                            ListTile(
-                              leading: Icon(Icons.airplanemode_active),
-                              title: Text("Airbus A220"),
-                            ),
-                            ListTile(
-                              leading: Icon(Icons.airplanemode_active),
-                              title: Text("Airbus A220"),
-                            ),
-                            ListTile(
-                              leading: Icon(Icons.airplanemode_active),
-                              title: Text("Airbus A220"),
-                            ),
-                            ListTile(
-                              leading: Icon(Icons.airplanemode_active),
-                              title: Text("Airbus A220"),
-                            ),
-                            ListTile(
-                              leading: Icon(Icons.airplanemode_active),
-                              title: Text("Airbus A220"),
-                            ),
-                          ],
-                        );
-                      });
+                  Navigator.pushNamed(context, SettingsScreen.id);
                 },
               ),
               SizedBox(),
@@ -169,17 +141,17 @@ class _MapScreenState extends State<MapScreen> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       body: Stack(
         children: <Widget>[
-          // GoogleMap(
-          //     myLocationEnabled: true,
-          //     myLocationButtonEnabled: false,
-          //     compassEnabled: false,
-          //     tiltGesturesEnabled: false,
-          //     mapType: MapType.normal,
-          //     initialCameraPosition: initialCameraPosition,
-          //     onMapCreated: (GoogleMapController controller) {
-          //       controller.setMapStyle(_mapStyle);
-          //       _controller.complete(controller);
-          //     })
+          GoogleMap(
+              myLocationEnabled: true,
+              myLocationButtonEnabled: false,
+              compassEnabled: false,
+              tiltGesturesEnabled: false,
+              mapType: MapType.normal,
+              initialCameraPosition: initialCameraPosition,
+              onMapCreated: (GoogleMapController controller) {
+                controller.setMapStyle(_mapStyle);
+                _controller.complete(controller);
+              })
         ],
       ),
     );

@@ -1,9 +1,10 @@
-import 'package:air_vision/services/bndbox.dart';
+import 'package:air_vision/services/api.dart';
+import 'package:air_vision/screens/Camera/bndbox.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:tflite/tflite.dart';
 import 'dart:math' as math;
-import '../util/models.dart';
+import '../../util/models.dart';
 
 // typedef void Callback(List<dynamic> list, int h, int w);
 
@@ -20,12 +21,13 @@ class _CameraScreenState extends State<CameraScreen> {
   int _imageWidth = 0;
   String _model = yolo;
 
+  Api _api = Api();
   CameraController controller;
   double scale = 1.0;
   bool isDetecting = false;
   bool modalIsOpen = false;
-  bool detectedAirplane = false;
-  String text = "";
+  bool detectedAircraft = false;
+  String infoText = "Find Aircraft";
 
   loadModel() async {
     await Tflite.loadModel(
@@ -109,10 +111,12 @@ class _CameraScreenState extends State<CameraScreen> {
       _recognitions = recognitions;
       _imageHeight = h;
       _imageWidth = w;
-      if (recognitions != null && recognitions.length > 0)
-        text = recognitions[0]["detectedClass"];
-      else {
-        text = "Find Aircraft";
+      if (recognitions.length > 0 &&
+          recognitions[0]["detectedClass"] == "aircraft") {
+        infoText = "Scan aircraft";
+        detectedAircraft = true;
+      } else {
+        infoText = "Find Aircraft";
       }
     });
   }
@@ -182,10 +186,10 @@ class _CameraScreenState extends State<CameraScreen> {
                   child: Align(
                     alignment: Alignment.bottomCenter,
                     child: Opacity(
-                      opacity: text == "aircraft" ? 1.0 : 0.8,
+                      opacity: detectedAircraft ? 1.0 : 0.8,
                       child: GestureDetector(
                         onTap: () {
-                          if(text == "aircraft")
+                          if (detectedAircraft)
                             scanAirplane(
                                 math.max(_imageHeight, _imageWidth),
                                 math.min(_imageHeight, _imageWidth),
@@ -209,7 +213,7 @@ class _CameraScreenState extends State<CameraScreen> {
                                 width: 5.0,
                               ),
                               Text(
-                                text,
+                                infoText,
                                 style: TextStyle(color: Colors.white),
                               )
                             ],
@@ -218,7 +222,7 @@ class _CameraScreenState extends State<CameraScreen> {
                       ),
                     ),
                   ),
-                )
+                ),
               ],
             ),
           )
