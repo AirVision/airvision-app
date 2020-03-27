@@ -117,6 +117,7 @@ class _CameraScreenState extends State<CameraScreen> {
         detectedAircraft = true;
       } else {
         infoText = "Find Aircraft";
+        detectedAircraft = false;
       }
     });
   }

@@ -1,11 +1,11 @@
 import 'package:air_vision/screens/camera/camera_screen.dart';
 import 'package:air_vision/screens/debug_screen.dart';
-import 'package:air_vision/screens/settings_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:async';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:location/location.dart';
+import 'package:air_vision/components/customBottomSheet.dart';
 
 const double CAMERA_ZOOM = 16;
 const double CAMERA_TILT = 20;
@@ -99,7 +99,17 @@ class _MapScreenState extends State<MapScreen> {
                   ],
                 ),
                 onPressed: () {
-                  Navigator.pushNamed(context, SettingsScreen.id);
+                  showModalBottomSheet(
+                      context: context,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(20.0),
+                            topLeft: Radius.circular(20)),
+                      ),
+                      builder: (context) {
+                        return CustomBottomSheet();
+                      }).whenComplete(() {});
+                  // Navigator.pushNamed(context, SettingsScreen.id);
                 },
               ),
               SizedBox(),

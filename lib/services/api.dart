@@ -31,32 +31,22 @@ class Api {
     }
   }
 
-  Future<dynamic> getAll({int time}) async {
-    Map<String, String> headers = {'Content-Type': 'application/json'};
-
-    String body = "{}";
-    if (time != null) body = "{'time': $time}";
-
-    http.Response responseData = await http.post(
-      baseURL + '/api/v1/aircraft/state/all',
-      body: body,
-      headers: headers,
-    );
-
-    if (responseData.statusCode == 200) {
-      return responseData.body;
-    } else {
-      return jsonDecode(responseData.body)['error']['message'];
-    }
-  }
-
-  Future<dynamic> getAllAround(List position, List size) async {
+  Future<dynamic> getAll({int time, List position, List bounds}) async {
     Map<String, String> headers = {'Content-Type': 'application/json'};
 
     String body = '''{
       "position": $position,
-      "size": $size
-    }''';
+      "bounds": $bounds}
+      ''';
+
+    if (time != null) {
+      body = '''{
+      "position": $position,
+      "bounds": $bounds,
+      "time": $time
+      }
+      ''';
+    }
 
     http.Response responseData = await http.post(
       baseURL + '/api/v1/aircraft/state/all',
