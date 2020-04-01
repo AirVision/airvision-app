@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math' as math;
 
 import 'package:air_vision/services/api.dart';
 import 'package:air_vision/services/time_service.dart';
@@ -39,20 +40,18 @@ class _DebugScreenState extends State<DebugScreen> {
 
   bool loading = false;
 
-  String _orientation = '';
+  List<double> _orientation = [];
 
   Future<void> _getDeviceOrientation() async {
-    String orientation;
     try {
-      final List<double> result = await platform.invokeMethod('getDeviceOrientation');
-      orientation = 'Device orientation is ${result[0]} ${result[1]} ${result[2]}.';
+      final List<double> result =
+          await platform.invokeMethod('getDeviceOrientation');
+      setState(() {
+        _orientation = result;
+      });
     } on PlatformException catch (e) {
-      orientation = "Failed to get orientation: '${e.message}'.";
+      print(e);
     }
-
-    setState(() {
-      _orientation = orientation;
-    });
   }
 
   _listenLocation() async {
@@ -75,13 +74,6 @@ class _DebugScreenState extends State<DebugScreen> {
         "${DateTime.now().hour}:${DateTime.now().minute}:${DateTime.now().second}";
     if (mounted) {
       _timer = Timer.periodic(Duration(seconds: 1), (Timer t) => _updateTime());
-      _gyroSubscription = gyroscopeEvents.listen((GyroscopeEvent event) {
-        setState(() {
-          x = event.x;
-          y = event.y;
-          z = event.y;
-        });
-      });
       _listenLocation();
     }
     super.initState();
@@ -163,19 +155,35 @@ class _DebugScreenState extends State<DebugScreen> {
                     padding: const EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 20.0),
                     child: Row(
                       children: <Widget>[
-                        Icon(FontAwesomeIcons.draftingCompass),
+                        IconButton(
+                          icon: Icon(Icons.rotate_right),
+                          onPressed: () {
+                            _getDeviceOrientation().then((res) {
+                              setState(() {
+                                x = (_orientation[1] * 180) / math.pi;
+                                y = (_orientation[2] * 180) / math.pi;
+                                z = ((_orientation[0] * -1) * 180) / math.pi;
+                              });
+                            });
+                          },
+                        ),
                         SizedBox(
                           width: 20.0,
                         ),
-                        Text('x: ${x.toStringAsFixed(1)}'),
-                        SizedBox(
-                          width: 20.0,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Text('x: ${x.toStringAsFixed(1)}'),
+                            SizedBox(
+                              width: 20.0,
+                            ),
+                            Text('y: ${y.toStringAsFixed(1)}'),
+                            SizedBox(
+                              width: 20.0,
+                            ),
+                            Text('z: ${z.toStringAsFixed(1)}'),
+                          ],
                         ),
-                        Text('y: ${y.toStringAsFixed(1)}'),
-                        SizedBox(
-                          width: 20.0,
-                        ),
-                        Text('z: ${z.toStringAsFixed(1)}'),
                       ],
                     ),
                   ),
@@ -214,37 +222,6 @@ class _DebugScreenState extends State<DebugScreen> {
                     ),
                   ),
                 ),
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 20.0),
-                    child: Row(
-                      children: <Widget>[
-                        Icon(Icons.rotate_right),
-                        SizedBox(
-                          width: 20.0,
-                        ),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            RaisedButton(
-                                child: Text('Get Device Orientation'),
-                                onPressed: () {
-                                  _getDeviceOrientation();
-                                  Fluttertoast.showToast(
-                                      msg:
-                                          "$_orientation",
-                                      toastLength: Toast.LENGTH_LONG,
-                                      gravity: ToastGravity.BOTTOM,
-                                      timeInSecForIosWeb: 1,
-                                      textColor: Colors.white,
-                                      fontSize: 16.0);
-                                }),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                )
               ],
             ),
           ),
