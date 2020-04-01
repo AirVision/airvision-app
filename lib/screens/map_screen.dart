@@ -52,6 +52,7 @@ class _MapScreenState extends State<MapScreen> {
 
     final GoogleMapController controller = await _controller.future;
     controller.animateCamera(CameraUpdate.newCameraPosition(cPosition));
+    controller.getVisibleRegion();
   }
 
   void setInitialLocation() async {
@@ -99,16 +100,7 @@ class _MapScreenState extends State<MapScreen> {
                   ],
                 ),
                 onPressed: () {
-                  showModalBottomSheet(
-                      context: context,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.only(
-                            topRight: Radius.circular(20.0),
-                            topLeft: Radius.circular(20)),
-                      ),
-                      builder: (context) {
-                        return CustomBottomSheet();
-                      }).whenComplete(() {});
+  
                   // Navigator.pushNamed(context, SettingsScreen.id);
                 },
               ),

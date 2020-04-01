@@ -17,7 +17,7 @@ class BndBox extends StatelessWidget {
   Widget build(BuildContext context) {
     List<Widget> _renderBoxes() {
       return results.map((re) {
-        if ((re["confidenceInClass"] * 100) > 55 && re["detectedClass"] == "aircraft") {
+        if ((re["confidenceInClass"] * 100) > 50 && re["detectedClass"] == "aircraft") {
           var _x = re["rect"]["x"];
           var _w = re["rect"]["w"];
           var _y = re["rect"]["y"];

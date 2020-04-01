@@ -1,12 +1,14 @@
+import 'dart:async';
+
 import 'package:air_vision/services/api.dart';
 import 'package:air_vision/screens/Camera/bndbox.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:location/location.dart';
 import 'package:tflite/tflite.dart';
 import 'dart:math' as math;
 import '../../util/models.dart';
-
-// typedef void Callback(List<dynamic> list, int h, int w);
 
 class CameraScreen extends StatefulWidget {
   static const String id = 'camera_screen';
@@ -15,19 +17,41 @@ class CameraScreen extends StatefulWidget {
 }
 
 class _CameraScreenState extends State<CameraScreen> {
+  static const platform = const MethodChannel('airvision/orientation');
+
   List<CameraDescription> cameras;
   List<dynamic> _recognitions;
   int _imageHeight = 0;
   int _imageWidth = 0;
   String _model = yolo;
 
+  StreamSubscription<LocationData> _locationSubscription;
+  LocationData _location;
+  final Location location = Location();
+  double lat = -0;
+  double lon = -0;
+
   Api _api = Api();
+
   CameraController controller;
   double scale = 1.0;
   bool isDetecting = false;
   bool modalIsOpen = false;
   bool detectedAircraft = false;
   String infoText = "Find Aircraft";
+
+  _listenLocation() async {
+    _locationSubscription = location.onLocationChanged().handleError((err) {
+      setState(() {});
+      _locationSubscription.cancel();
+    }).listen((LocationData currentLocation) {
+      setState(() {
+        _location = currentLocation;
+        lat = _location.latitude;
+        lon = _location.longitude;
+      });
+    });
+  }
 
   loadModel() async {
     await Tflite.loadModel(
@@ -70,38 +94,43 @@ class _CameraScreenState extends State<CameraScreen> {
     });
   }
 
-  scanAirplane(h, w, sh, sw) {
+  scanAirplane(previewH, previewW, screenH, screenW) async {
     if (!modalIsOpen) {
-      modalIsOpen = true;
-      showModalBottomSheet(
-          context: context,
-          builder: (context) {
-            return Column(
-              children: <Widget>[
-                ListTile(
-                  leading: Icon(Icons.airplanemode_active),
-                  title: Text("Airbus A220"),
+      var aircrafts = [];
+      var time = DateTime.now().millisecondsSinceEpoch;
+      var position = [lat, lon];
+      var fov = [80, 80];
+      final List<double> rotation =
+          await platform.invokeMethod('getDeviceOrientation');
+
+      _recognitions.map((re) {
+        var _x = re["rect"]["x"];
+        var _w = re["rect"]["w"];
+        var _y = re["rect"]["y"];
+        var _h = re["rect"]["h"];
+        var aircraft = [
+          [_x + (_w / 2), _y + (_h / 2)],
+          [_w, _h]
+        ];
+        aircrafts.add(aircraft);
+      });
+
+      _api
+          .getVisibleAircraft(time, position, rotation, fov, aircrafts)
+          .then((res) {
+        modalIsOpen = true;
+
+        showModalBottomSheet(
+                context: context,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(20.0),
+                      topLeft: Radius.circular(20)),
                 ),
-                ListTile(
-                  leading: Icon(Icons.airplanemode_active),
-                  title: Text("Airbus A220"),
-                ),
-                ListTile(
-                  leading: Icon(Icons.airplanemode_active),
-                  title: Text("Airbus A220"),
-                ),
-                ListTile(
-                  leading: Icon(Icons.airplanemode_active),
-                  title: Text("Airbus A220"),
-                ),
-                ListTile(
-                  leading: Icon(Icons.airplanemode_active),
-                  title: Text("Airbus A220"),
-                ),
-              ],
-            );
-          }).whenComplete(() {
-        modalIsOpen = false;
+                builder: (context) {
+                  // return CustomBottomSheet();
+                })
+            .whenComplete(() {});
       });
     }
   }
@@ -125,14 +154,18 @@ class _CameraScreenState extends State<CameraScreen> {
   @override
   void initState() {
     super.initState();
+    platform.invokeMethod('startListeningDeviceOrientation');
     loadModel();
     getCameras();
+    _listenLocation();
   }
 
   @override
   void dispose() {
     super.dispose();
+    platform.invokeMethod('stopListeningDeviceOrientation');
     controller?.dispose();
+    _locationSubscription.cancel();
   }
 
   @override

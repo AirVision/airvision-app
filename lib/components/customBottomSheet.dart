@@ -1,8 +1,18 @@
+import 'package:air_vision/models/aircraftState.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import './customListTile.dart';
 
-class CustomBottomSheet extends StatelessWidget {
+class CustomBottomSheet extends StatefulWidget {
+  final AircraftState state;
+
+  const CustomBottomSheet(this.state);
+
+  @override
+  _CustomBottomSheetState createState() => _CustomBottomSheetState();
+}
+
+class _CustomBottomSheetState extends State<CustomBottomSheet> {
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -43,14 +53,7 @@ class CustomBottomSheet extends StatelessWidget {
             SizedBox(
               height: 10.0,
             ),
-            CustomListTile(FontAwesomeIcons.plane),
-            CustomListTile(FontAwesomeIcons.tag),
-            CustomListTile(FontAwesomeIcons.globeEurope),
-            CustomListTile(FontAwesomeIcons.tachometerAlt),
-            CustomListTile(FontAwesomeIcons.planeArrival),
-            CustomListTile(FontAwesomeIcons.planeDeparture),
-            CustomListTile(Icons.info),
-            CustomListTile(Icons.info),
+            CustomListTile(FontAwesomeIcons.plane, widget.state.icao24),
             SizedBox(
               height: 10.0,
             ),

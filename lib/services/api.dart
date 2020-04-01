@@ -1,6 +1,4 @@
 import 'dart:convert';
-
-import 'package:basic_utils/basic_utils.dart';
 import 'package:http/http.dart' as http;
 
 String baseURL = 'https://airvision.seppevolkaerts.be';
@@ -13,7 +11,11 @@ class Api {
     String body = '''{
       'time': $time,
       'position': $position,
-      'rotation': $rotation,
+      'rotation': [
+        ${rotation[1]},
+        ${rotation[2]},
+        ${(rotation[0] * -1)}
+      ],
       'fov': $fov,
       'aircrafts': $aircrafts
     }''';

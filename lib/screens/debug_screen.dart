@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:air_vision/services/api.dart';
 import 'package:air_vision/services/time_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -18,6 +19,8 @@ class DebugScreen extends StatefulWidget {
 }
 
 class _DebugScreenState extends State<DebugScreen> {
+  static const platform = const MethodChannel('airvision/orientation');
+
   double lat = -0;
   double lon = -0;
   double x = 0;
@@ -36,6 +39,22 @@ class _DebugScreenState extends State<DebugScreen> {
 
   bool loading = false;
 
+  String _orientation = '';
+
+  Future<void> _getDeviceOrientation() async {
+    String orientation;
+    try {
+      final List<double> result = await platform.invokeMethod('getDeviceOrientation');
+      orientation = 'Device orientation is ${result[0]} ${result[1]} ${result[2]}.';
+    } on PlatformException catch (e) {
+      orientation = "Failed to get orientation: '${e.message}'.";
+    }
+
+    setState(() {
+      _orientation = orientation;
+    });
+  }
+
   _listenLocation() async {
     _locationSubscription = location.onLocationChanged().handleError((err) {
       setState(() {});
@@ -51,6 +70,7 @@ class _DebugScreenState extends State<DebugScreen> {
 
   @override
   void initState() {
+    platform.invokeMethod('startListeningDeviceOrientation');
     _timeString =
         "${DateTime.now().hour}:${DateTime.now().minute}:${DateTime.now().second}";
     if (mounted) {
@@ -79,6 +99,7 @@ class _DebugScreenState extends State<DebugScreen> {
     _timer.cancel();
     _gyroSubscription.cancel();
     _locationSubscription.cancel();
+    platform.invokeMethod('stopListeningDeviceOrientation');
   }
 
   @override
@@ -179,7 +200,8 @@ class _DebugScreenState extends State<DebugScreen> {
                                 });
                                 var data = jsonDecode(res)['data'][0]['icao24'];
                                 Fluttertoast.showToast(
-                                    msg: "Request succesfull first record ICAO is: $data",
+                                    msg:
+                                        "Request succesfull first record ICAO is: $data",
                                     toastLength: Toast.LENGTH_LONG,
                                     gravity: ToastGravity.BOTTOM,
                                     timeInSecForIosWeb: 1,
@@ -188,6 +210,37 @@ class _DebugScreenState extends State<DebugScreen> {
                               });
                             },
                             child: Text('Request /all'))
+                      ],
+                    ),
+                  ),
+                ),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 20.0),
+                    child: Row(
+                      children: <Widget>[
+                        Icon(Icons.rotate_right),
+                        SizedBox(
+                          width: 20.0,
+                        ),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            RaisedButton(
+                                child: Text('Get Device Orientation'),
+                                onPressed: () {
+                                  _getDeviceOrientation();
+                                  Fluttertoast.showToast(
+                                      msg:
+                                          "$_orientation",
+                                      toastLength: Toast.LENGTH_LONG,
+                                      gravity: ToastGravity.BOTTOM,
+                                      timeInSecForIosWeb: 1,
+                                      textColor: Colors.white,
+                                      fontSize: 16.0);
+                                }),
+                          ],
+                        ),
                       ],
                     ),
                   ),

@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 class CustomListTile extends StatefulWidget {
   
   final IconData icon;
-  
+  final String icao24;
 
 
-  const CustomListTile(this.icon);
+  const CustomListTile(this.icon, this.icao24);
 
   @override
   _CustomListTileState createState() => _CustomListTileState();
