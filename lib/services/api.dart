@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'dart:math' as math;
 
 String baseURL = 'https://airvision.seppevolkaerts.be';
 
@@ -12,9 +13,9 @@ class Api {
       "time": $time,
       "position": $position,
       "rotation": [
-        ${rotation[1]},
-        ${rotation[2]},
-        ${(rotation[0] * -1)}
+        ${(rotation[1] * 180)/ math.pi},
+        ${(rotation[2] * 180) / math.pi},
+        ${((rotation[0] * -1) * 180) / math.pi}
       ],
       "fov": $fov,
       "aircrafts": [{

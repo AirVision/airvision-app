@@ -110,8 +110,6 @@ class _CameraScreenState extends State<CameraScreen> {
             numResultsPerClass: 1,
             threshold: _model == yolo ? 0.2 : 0.4,
           ).then((recognitions) {
-            // int endTime = new DateTime.now().millisecondsSinceEpoch;
-            // print("Detection took ${endTime - startTime}");
             updateRecognitions(recognitions, img.height, img.width);
             isDetecting = false;
           });
@@ -122,7 +120,6 @@ class _CameraScreenState extends State<CameraScreen> {
 
   scanAirplane(previewH, previewW, screenH, screenW) async {
     if (!modalIsOpen) {
-      var aircrafts = [];
       var time = DateTime.now().millisecondsSinceEpoch;
       var position = [lat, lon];
       var fov = [80, 80];
