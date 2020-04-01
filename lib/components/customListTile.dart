@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 
 class CustomListTile extends StatefulWidget {
   
-  final IconData icon;
-  final String icao24;
+  // final IconData icon;
+  // final String icao24;
 
 
-  const CustomListTile(this.icon, this.icao24);
+  // const CustomListTile(this.icon, this.icao24);
 
   @override
   _CustomListTileState createState() => _CustomListTileState();
@@ -24,7 +24,7 @@ class _CustomListTileState extends State<CustomListTile> {
           color: Colors.grey[100],
         ),
         child: ListTile(
-          leading: Icon(widget.icon),
+          // leading: Icon(widget.icon),
           title: Text("Airbus A220"),
         ),
       ),

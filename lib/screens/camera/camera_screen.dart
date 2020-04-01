@@ -1,11 +1,14 @@
 import 'dart:async';
+import 'dart:convert';
 
+import 'package:air_vision/components/customBottomSheet.dart';
 import 'package:air_vision/services/api.dart';
 import 'package:air_vision/screens/Camera/bndbox.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:location/location.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:tflite/tflite.dart';
 import 'dart:math' as math;
 import '../../util/models.dart';
@@ -34,11 +37,22 @@ class _CameraScreenState extends State<CameraScreen> {
   Api _api = Api();
 
   CameraController controller;
+  double previewH = 0.0;
+  double previewW = 0.0;
+  double screenRatio = 0.0;
+  double previewRatio = 0.0;
+  Size screen;
+
+  double screenH = 0.0;
+  double screenW = 0.0;
+
   double scale = 1.0;
   bool isDetecting = false;
   bool modalIsOpen = false;
   bool detectedAircraft = false;
   String infoText = "Find Aircraft";
+
+  bool gotCameraPermission = false;
 
   _listenLocation() async {
     _locationSubscription = location.onLocationChanged().handleError((err) {
@@ -57,17 +71,29 @@ class _CameraScreenState extends State<CameraScreen> {
     await Tflite.loadModel(
         model: "assets/yolov2_tiny.tflite",
         labels: "assets/yolov2_tiny.txt",
-        numThreads: 1);
+        numThreads: 2);
   }
 
   void getCameras() async {
     print('Start');
     cameras = await availableCameras();
     controller = CameraController(cameras[0], ResolutionPreset.ultraHigh);
+
     controller.initialize().then((_) {
-      if (!mounted) {
+      if (!mounted && !gotCameraPermission) {
         return;
       }
+
+      screen = MediaQuery.of(context).size;
+      var tmp = MediaQuery.of(context).size;
+      screenH = math.max(tmp.height, tmp.width);
+      screenW = math.min(tmp.height, tmp.width);
+
+      tmp = controller.value.previewSize;
+      previewH = math.max(tmp.height, tmp.width);
+      previewW = math.min(tmp.height, tmp.width);
+      screenRatio = screenH / screenW;
+      previewRatio = previewH / previewW;
       setState(() {});
       controller.startImageStream((CameraImage img) {
         if (!isDetecting) {
@@ -103,34 +129,33 @@ class _CameraScreenState extends State<CameraScreen> {
       final List<double> rotation =
           await platform.invokeMethod('getDeviceOrientation');
 
-      _recognitions.map((re) {
-        var _x = re["rect"]["x"];
-        var _w = re["rect"]["w"];
-        var _y = re["rect"]["y"];
-        var _h = re["rect"]["h"];
-        var aircraft = [
-          [_x + (_w / 2), _y + (_h / 2)],
-          [_w, _h]
-        ];
-        aircrafts.add(aircraft);
-      });
+      var _x = _recognitions[0]["rect"]["x"];
+      var _w = _recognitions[0]["rect"]["w"];
+      var _y = _recognitions[0]["rect"]["y"];
+      var _h = _recognitions[0]["rect"]["h"];
+
+      var aircraftPosition = [_x + (_w / 2), _y + (_h / 2)];
+      var aircraftSize = [_w, _h];
+
+      print(_recognitions);
 
       _api
-          .getVisibleAircraft(time, position, rotation, fov, aircrafts)
+          .getVisibleAircraft(
+              time, position, rotation, fov, aircraftPosition, aircraftSize)
           .then((res) {
         modalIsOpen = true;
+        print(jsonDecode(res));
 
         showModalBottomSheet(
-                context: context,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(20.0),
-                      topLeft: Radius.circular(20)),
-                ),
-                builder: (context) {
-                  // return CustomBottomSheet();
-                })
-            .whenComplete(() {});
+            context: context,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                  topRight: Radius.circular(20.0),
+                  topLeft: Radius.circular(20)),
+            ),
+            builder: (context) {
+              return CustomBottomSheet(res);
+            }).whenComplete(() {});
       });
     }
   }
@@ -154,6 +179,7 @@ class _CameraScreenState extends State<CameraScreen> {
   @override
   void initState() {
     super.initState();
+    checkCameraPermission();
     platform.invokeMethod('startListeningDeviceOrientation');
     loadModel();
     getCameras();
@@ -168,21 +194,28 @@ class _CameraScreenState extends State<CameraScreen> {
     _locationSubscription.cancel();
   }
 
+  Future<void> checkCameraPermission() async {
+    var status = await Permission.camera.status;
+
+    if (status.isUndetermined || status.isDenied) {
+      setState(() {
+        gotCameraPermission = false;
+      });
+    }
+    if (status.isGranted) {
+      setState(() {
+        gotCameraPermission = true;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    Size screen = MediaQuery.of(context).size;
+    checkCameraPermission();
 
-    var tmp = MediaQuery.of(context).size;
-    var screenH = math.max(tmp.height, tmp.width);
-    var screenW = math.min(tmp.height, tmp.width);
-    if (controller != null) {
-      tmp = controller.value.previewSize;
-    }
-    var previewH = math.max(tmp.height, tmp.width);
-    var previewW = math.min(tmp.height, tmp.width);
-    var screenRatio = screenH / screenW;
-    var previewRatio = previewH / previewW;
-    return controller != null
+    if (controller != null) {}
+
+    return controller != null && controller.value.isInitialized
         ? Scaffold(
             appBar: AppBar(
               title: Text(
@@ -198,67 +231,69 @@ class _CameraScreenState extends State<CameraScreen> {
               ),
               iconTheme: IconThemeData(color: Colors.black),
             ),
-            body: Stack(
-              children: [
-                OverflowBox(
-                  maxHeight: screenRatio > previewRatio
-                      ? screenH
-                      : screenW / previewW * previewH,
-                  maxWidth: screenRatio > previewRatio
-                      ? screenH / previewH * previewW
-                      : screenW,
-                  child: CameraPreview(controller),
-                ),
-                BndBox(
-                    _recognitions == null ? [] : _recognitions,
-                    math.max(_imageHeight, _imageWidth),
-                    math.min(_imageHeight, _imageWidth),
-                    screen.height,
-                    screen.width),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 40.0),
-                  child: Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Opacity(
-                      opacity: detectedAircraft ? 1.0 : 0.8,
-                      child: GestureDetector(
-                        onTap: () {
-                          if (detectedAircraft)
-                            scanAirplane(
-                                math.max(_imageHeight, _imageWidth),
-                                math.min(_imageHeight, _imageWidth),
-                                screen.height,
-                                screen.width);
-                        },
-                        child: Container(
-                          width: 180.0,
-                          height: 50.0,
-                          decoration: BoxDecoration(
-                              color: Color(0xff3496F7),
-                              borderRadius: BorderRadius.circular(20.0)),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              Icon(
-                                Icons.info_outline,
-                                color: Colors.white,
+            body: gotCameraPermission
+                ? Stack(
+                    children: [
+                      OverflowBox(
+                        maxHeight: screenRatio > previewRatio
+                            ? screenH
+                            : screenW / previewW * previewH,
+                        maxWidth: screenRatio > previewRatio
+                            ? screenH / previewH * previewW
+                            : screenW,
+                        child: CameraPreview(controller),
+                      ),
+                      BndBox(
+                          _recognitions == null ? [] : _recognitions,
+                          math.max(_imageHeight, _imageWidth),
+                          math.min(_imageHeight, _imageWidth),
+                          screen.height,
+                          screen.width),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 40.0),
+                        child: Align(
+                          alignment: Alignment.bottomCenter,
+                          child: Opacity(
+                            opacity: detectedAircraft ? 1.0 : 0.8,
+                            child: GestureDetector(
+                              onTap: () {
+                                if (detectedAircraft)
+                                  scanAirplane(
+                                      math.max(_imageHeight, _imageWidth),
+                                      math.min(_imageHeight, _imageWidth),
+                                      screen.height,
+                                      screen.width);
+                              },
+                              child: Container(
+                                width: 180.0,
+                                height: 50.0,
+                                decoration: BoxDecoration(
+                                    color: Color(0xff3496F7),
+                                    borderRadius: BorderRadius.circular(20.0)),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: <Widget>[
+                                    Icon(
+                                      Icons.info_outline,
+                                      color: Colors.white,
+                                    ),
+                                    SizedBox(
+                                      width: 5.0,
+                                    ),
+                                    Text(
+                                      infoText,
+                                      style: TextStyle(color: Colors.white),
+                                    )
+                                  ],
+                                ),
                               ),
-                              SizedBox(
-                                width: 5.0,
-                              ),
-                              Text(
-                                infoText,
-                                style: TextStyle(color: Colors.white),
-                              )
-                            ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+                    ],
+                  )
+                : Container(),
           )
         : Container();
   }

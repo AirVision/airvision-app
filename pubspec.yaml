@@ -21,7 +21,7 @@ dependencies:
   basic_utils: ^2.5.3
   flutter_spinkit: "^4.1.2"
   fluttertoast: ^4.0.1
-
+  permission_handler: ^5.0.0+hotfix.2
   
 dev_dependencies:
   flutter_test:

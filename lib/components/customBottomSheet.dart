@@ -4,9 +4,14 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import './customListTile.dart';
 
 class CustomBottomSheet extends StatefulWidget {
-  final AircraftState state;
+  // final AircraftState state;
 
-  const CustomBottomSheet(this.state);
+  // const CustomBottomSheet({this.state});
+
+  final dynamic res;
+
+  const CustomBottomSheet(this.res);
+
 
   @override
   _CustomBottomSheetState createState() => _CustomBottomSheetState();
@@ -53,7 +58,8 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
             SizedBox(
               height: 10.0,
             ),
-            CustomListTile(FontAwesomeIcons.plane, widget.state.icao24),
+            Text(widget.res),
+            // CustomListTile(FontAwesomeIcons.plane, widget.state.icao24),
             SizedBox(
               height: 10.0,
             ),

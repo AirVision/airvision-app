@@ -5,20 +5,25 @@ String baseURL = 'https://airvision.seppevolkaerts.be';
 
 class Api {
   Future<dynamic> getVisibleAircraft(
-      int time, List position, List rotation, List fov, List aircrafts) async {
+      int time, List position, List rotation, List fov, List aircraftPosition, List aircraftSize) async {
     Map<String, String> headers = {'Content-Type': 'application/json'};
 
     String body = '''{
-      'time': $time,
-      'position': $position,
-      'rotation': [
+      "time": $time,
+      "position": $position,
+      "rotation": [
         ${rotation[1]},
         ${rotation[2]},
         ${(rotation[0] * -1)}
       ],
-      'fov': $fov,
-      'aircrafts': $aircrafts
+      "fov": $fov,
+      "aircrafts": [{
+        "position": $aircraftPosition, 
+        "size": $aircraftSize
+      }]
     }''';
+
+    print(body);
 
     http.Response responseData = await http.post(
       baseURL + '/api/v1/aircraft/state/visible',
