@@ -27,6 +27,7 @@ class _DebugScreenState extends State<DebugScreen> {
   double x = 0;
   double y = 0;
   double z = 0;
+  double w = 0;
   Timer _timer;
   String _timeString;
   Api _api = Api();
@@ -160,9 +161,10 @@ class _DebugScreenState extends State<DebugScreen> {
                           onPressed: () {
                             _getDeviceOrientation().then((res) {
                               setState(() {
-                                x = (_orientation[1] * 180) / math.pi;
-                                y = (_orientation[2] * 180) / math.pi;
-                                z = ((_orientation[0] * -1) * 180) / math.pi;
+                                x = (_orientation[0] * 180) / math.pi;
+                                y = (_orientation[1] * 180) / math.pi;
+                                z = ((_orientation[2]) * 180) / math.pi;
+                                w = ((_orientation[3]) * 180) / math.pi;
                               });
                             });
                           },
@@ -182,6 +184,10 @@ class _DebugScreenState extends State<DebugScreen> {
                               width: 20.0,
                             ),
                             Text('z: ${z.toStringAsFixed(1)}'),
+                             SizedBox(
+                              width: 20.0,
+                            ),
+                            Text('w: ${w.toStringAsFixed(1)}'),
                           ],
                         ),
                       ],

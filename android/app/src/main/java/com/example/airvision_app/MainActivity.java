@@ -31,6 +31,9 @@ public class MainActivity extends FlutterActivity implements SensorEventListener
     private SensorManager mSensorManager;
     private Sensor mAccelerometer;
     private Sensor mMagnetometer;
+    private Sensor mRotationSensor;
+
+    private float[] currentOrientationRotationMatrix = new float[16];
 
     private float[] mLastAccelerometer = new float[3];
     private float[] mLastMagnetometer = new float[3];
@@ -39,6 +42,9 @@ public class MainActivity extends FlutterActivity implements SensorEventListener
 
     private float[] mR = new float[9];
     private float[] mOrientation = new float[3];
+    private float[] mQuaterion = new float[4]; // = output
+
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState, @Nullable PersistableBundle persistentState) {
@@ -56,6 +62,7 @@ public class MainActivity extends FlutterActivity implements SensorEventListener
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         mMagnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        mRotationSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
 
         new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), CHANNEL)
                 .setMethodCallHandler(
@@ -63,10 +70,10 @@ public class MainActivity extends FlutterActivity implements SensorEventListener
                             // Note: this method is invoked on the main thread.
                             switch (call.method) {
                                 case "getDeviceOrientation":
-                                    if (mOrientation != null) {
-                                        double[] output = new double[mOrientation.length];
-                                        for (int i = 0; i < mOrientation.length; i++) {
-                                            output[i] = mOrientation[i];
+                                    if (mQuaterion != null) {
+                                        double[] output = new double[mQuaterion.length];
+                                        for (int i = 0; i < mQuaterion.length; i++) {
+                                            output[i] = mQuaterion[i];
                                         }
                                         result.success(output);
                                     } else {
@@ -76,8 +83,9 @@ public class MainActivity extends FlutterActivity implements SensorEventListener
                                 case "startListeningDeviceOrientation":
                                     mLastAccelerometerSet = false;
                                     mLastMagnetometerSet = false;
-                                    mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-                                    mSensorManager.registerListener(this, mMagnetometer, SensorManager.SENSOR_DELAY_NORMAL);
+                                    mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_FASTEST);
+                                    mSensorManager.registerListener(this, mMagnetometer, SensorManager.SENSOR_DELAY_FASTEST);
+                                    mSensorManager.registerListener(this, mRotationSensor, SensorManager.SENSOR_DELAY_FASTEST);
                                     break;
                                 case "stopListeningDeviceOrientation":
                                     mSensorManager.unregisterListener(this);
@@ -91,18 +99,44 @@ public class MainActivity extends FlutterActivity implements SensorEventListener
     }
 
 
+//    @Override
+//    public void onSensorChanged(SensorEvent event) {
+//        if (event.sensor == mAccelerometer) {
+//            System.arraycopy(event.values, 0, mLastAccelerometer, 0, event.values.length);
+//            mLastAccelerometerSet = true;
+//        } else if (event.sensor == mMagnetometer) {
+//            System.arraycopy(event.values, 0, mLastMagnetometer, 0, event.values.length);
+//            mLastMagnetometerSet = true;
+//        }
+//        if (mLastAccelerometerSet && mLastMagnetometerSet) {
+//            SensorManager.getRotationMatrix(mR, null, mLastAccelerometer, mLastMagnetometer);
+//            SensorManager.getOrientation(mR, mOrientation);
+//        }
+//    }
+
     @Override
     public void onSensorChanged(SensorEvent event) {
-        if (event.sensor == mAccelerometer) {
-            System.arraycopy(event.values, 0, mLastAccelerometer, 0, event.values.length);
-            mLastAccelerometerSet = true;
-        } else if (event.sensor == mMagnetometer) {
-            System.arraycopy(event.values, 0, mLastMagnetometer, 0, event.values.length);
-            mLastMagnetometerSet = true;
-        }
-        if (mLastAccelerometerSet && mLastMagnetometerSet) {
-            SensorManager.getRotationMatrix(mR, null, mLastAccelerometer, mLastMagnetometer);
-            SensorManager.getOrientation(mR, mOrientation);
+        // we received a sensor event. it is a good practice to check
+        // that we received the proper event
+        if (event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR) {
+            // convert the rotation-vector to a 4x4 matrix. the matrix
+            // is interpreted by Open GL as the inverse of the
+            // rotation-vector, which is what we want.
+//            SensorManager.getRotationMatrixFromVector(currentOrientationRotationMatrix.matrix, event.values);
+
+            // Get Quaternion
+            // Calculate angle. Starting with API_18, Android will provide this value as event.values[3], but if not, we have to calculate it manually.
+//            SensorManager.getQuaternionFromVector(temporaryQuaternion, event.values);
+//            currentOrientationQuaternion.setXYZW(temporaryQuaternion[1], temporaryQuaternion[2], temporaryQuaternion[3], -temporaryQuaternion[0]);
+
+            float[] quaterionWXYZ = new float[4];
+            SensorManager.getQuaternionFromVector(quaterionWXYZ, event.values);
+
+            mQuaterion[0] = quaterionWXYZ[1];
+            mQuaterion[1] = quaterionWXYZ[2];
+            mQuaterion[2] = quaterionWXYZ[3];
+            mQuaterion[3] = quaterionWXYZ[0];
+
         }
     }
 

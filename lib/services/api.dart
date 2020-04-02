@@ -13,9 +13,10 @@ class Api {
       "time": $time,
       "position": $position,
       "rotation": [
-        ${(rotation[1] * 180)/ math.pi},
-        ${(rotation[2] * 180) / math.pi},
-        ${((rotation[0] * -1) * 180) / math.pi}
+        ${rotation[0]},
+        ${rotation[1]},
+        ${rotation[2]},
+        ${rotation[3]}
       ],
       "fov": $fov,
       "aircrafts": [{
