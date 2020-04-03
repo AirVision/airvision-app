@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:air_vision/screens/camera/camera_screen.dart';
 import 'package:air_vision/screens/debug_screen.dart';
 import 'package:air_vision/services/api.dart';
@@ -7,12 +9,13 @@ import 'dart:async';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:location/location.dart';
 import 'package:air_vision/components/customBottomSheet.dart';
+import 'dart:ui' as ui;
 
-const double CAMERA_ZOOM = 16;
+const double CAMERA_ZOOM = 10;
 const double CAMERA_TILT = 20;
 const double CAMERA_BEARING = 0;
-const LatLng SOURCE_LOCATION = LatLng(42.747932, -71.167889);
-const LatLng DEST_LOCATION = LatLng(37.335685, -122.0605916);
+const LatLng SOURCE_LOCATION = LatLng(0, 0);
+const LatLng DEST_LOCATION = LatLng(0, 0);
 
 class MapScreen extends StatefulWidget {
   static const String id = 'map_screen';
@@ -28,10 +31,34 @@ class _MapScreenState extends State<MapScreen> {
   Location location;
   GoogleMapController controller;
   Api _api = Api();
+  bool canMakeRequest = true;
+  Timer _timer;
+
+  Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
+  BitmapDescriptor pinLocationIcon;
+  Uint8List markerIcon;
+
+  Future<Uint8List> getBytesFromAsset(String path, int width) async {
+    ByteData data = await rootBundle.load(path);
+    ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(),
+        targetWidth: width);
+    ui.FrameInfo fi = await codec.getNextFrame();
+    return (await fi.image.toByteData(format: ui.ImageByteFormat.png))
+        .buffer
+        .asUint8List();
+  }
+
+  getCustomMarker() async {
+    markerIcon = await getBytesFromAsset('assets/plane.png', 250);
+  }
 
   @override
   void initState() {
     super.initState();
+    getCustomMarker();
+
+    // _timer = Timer.periodic(
+    //     Duration(seconds: 10), (Timer t) => canMakeRequest = true);
     location = new Location();
     location.onLocationChanged().listen((LocationData cLoc) {
       currentLocation = cLoc;
@@ -40,6 +67,7 @@ class _MapScreenState extends State<MapScreen> {
     rootBundle.loadString('assets/mapStyle.txt').then((string) {
       _mapStyle = string;
     });
+
     setInitialLocation();
   }
 
@@ -59,24 +87,47 @@ class _MapScreenState extends State<MapScreen> {
     currentLocation = await location.getLocation();
   }
 
-  void updateAircrafts() async {
-    controller.getVisibleRegion().then((LatLngBounds res) async {
+  void updateAircrafts() {
+    controller.getVisibleRegion().then((LatLngBounds res) {
       var bounds = [
         [res.northeast.latitude, res.northeast.longitude],
         [res.southwest.latitude, res.southwest.longitude]
       ];
 
-      // _api.getAll(bounds: bounds).then((aircrafts){
-      //   print(aircrafts.length);
-      // });
-      var pinLocationIcon = await BitmapDescriptor.fromAssetImage(
-      ImageConfiguration(devicePixelRatio: 2.5),
-      'assets/plane.png');
+      if (canMakeRequest) {
+        canMakeRequest = false;
+        _api.getAll(bounds: bounds).then((aircrafts) {
+          aircrafts.forEach((aircraft) {
+            print(aircraft.position);
+            if (aircraft.position != null) {
+              setState(() {
+                final markerId = MarkerId(aircraft.icao24);
+                final marker = Marker(
+                    markerId: markerId,
+                    position:
+                        LatLng(aircraft.position[0], aircraft.position[1]),
+                    icon: BitmapDescriptor.fromBytes(markerIcon),
+                    
+                    onTap: () {
+                      print("========== MARKERPRESS ==========");
+                      onMarkerTap(markerId);
+                    });
+                markers[marker.markerId] = marker;
+              });
+            }
+          });
+        });
+      }
     });
+  }
+
+  void onMarkerTap(MarkerId id) {
+    print(id.value);
   }
 
   @override
   void dispose() {
+    _timer.cancel();
     super.dispose();
   }
 
@@ -163,6 +214,7 @@ class _MapScreenState extends State<MapScreen> {
                 // cameraPosition will have zoom, tilt, target(LatLng) and bearing
                 updateAircrafts();
               },
+              markers: Set<Marker>.of(markers.values),
               buildingsEnabled: true,
               myLocationEnabled: true,
               myLocationButtonEnabled: false,
