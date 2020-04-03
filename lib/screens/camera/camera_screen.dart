@@ -4,12 +4,13 @@ import 'dart:convert';
 import 'package:air_vision/components/customBottomSheet.dart';
 import 'package:air_vision/services/api.dart';
 import 'package:air_vision/screens/Camera/bndbox.dart';
+import 'package:air_vision/services/orientation_service.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:location/location.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:tflite/tflite.dart';
+import 'package:vector_math/vector_math.dart' show Quaternion;
 import 'dart:math' as math;
 import '../../util/models.dart';
 
@@ -20,7 +21,7 @@ class CameraScreen extends StatefulWidget {
 }
 
 class _CameraScreenState extends State<CameraScreen> {
-  static const platform = const MethodChannel('airvision/orientation');
+  OrientationService _orientationService = OrientationService();
 
   List<CameraDescription> cameras;
   List<dynamic> _recognitions;
@@ -123,8 +124,7 @@ class _CameraScreenState extends State<CameraScreen> {
       var time = DateTime.now().millisecondsSinceEpoch;
       var position = [lat, lon];
       var fov = [80, 80];
-      final List<double> rotation =
-          await platform.invokeMethod('getDeviceOrientation');
+      final Quaternion rotation = await _orientationService.getQuaternion();
 
       var _x = _recognitions[0]["rect"]["x"];
       var _w = _recognitions[0]["rect"]["w"];
@@ -177,7 +177,7 @@ class _CameraScreenState extends State<CameraScreen> {
   void initState() {
     super.initState();
     checkCameraPermission();
-    platform.invokeMethod('startListeningDeviceOrientation');
+    _orientationService.start();
     loadModel();
     getCameras();
     _listenLocation();
@@ -186,7 +186,7 @@ class _CameraScreenState extends State<CameraScreen> {
   @override
   void dispose() {
     super.dispose();
-    platform.invokeMethod('stopListeningDeviceOrientation');
+    _orientationService.stop();
     controller?.dispose();
     _locationSubscription.cancel();
   }
