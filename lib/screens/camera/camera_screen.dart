@@ -5,6 +5,7 @@ import 'package:air_vision/components/customBottomSheet.dart';
 import 'package:air_vision/services/api.dart';
 import 'package:air_vision/screens/Camera/bndbox.dart';
 import 'package:air_vision/services/orientation_service.dart';
+import 'package:air_vision/util/date_time.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
@@ -122,7 +123,7 @@ class _CameraScreenState extends State<CameraScreen> {
 
   scanAirplane(previewH, previewW, screenH, screenW) async {
     if (!modalIsOpen) {
-      var time = DateTime.now().millisecondsSinceEpoch;
+      var time = DateTime.now().secondsSinceEpoch;
       var position = [lat, lon];
       var fov = [80, 80];
       final Quaternion rotation = await _orientationService.getQuaternion();

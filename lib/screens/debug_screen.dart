@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:math' as math;
 
+import 'package:air_vision/math/euler_angles.dart';
 import 'package:air_vision/services/api.dart';
+import 'package:air_vision/services/orientation_service.dart';
 import 'package:air_vision/services/time_service.dart';
+import 'package:air_vision/math/quaternion.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -11,6 +13,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:location/location.dart';
 import 'package:sensors/sensors.dart';
+import 'package:vector_math/vector_math.dart' show Quaternion, degrees;
 
 class DebugScreen extends StatefulWidget {
   static const String id = 'leaderboard_screen';
@@ -20,14 +23,11 @@ class DebugScreen extends StatefulWidget {
 }
 
 class _DebugScreenState extends State<DebugScreen> {
-  static const platform = const MethodChannel('airvision/orientation');
+
+  final OrientationService _orientationService = OrientationService();
 
   double lat = -0;
   double lon = -0;
-  double x = 0;
-  double y = 0;
-  double z = 0;
-  double w = 0;
   Timer _timer;
   String _timeString;
   Api _api = Api();
@@ -40,13 +40,13 @@ class _DebugScreenState extends State<DebugScreen> {
 
   bool loading = false;
 
-  List<double> _orientation = [];
+  EulerAngles _rotation = EulerAngles.zero();
 
-  Future<void> _getDeviceOrientation() async {
+  Future<void> _updateDeviceOrientation() async {
     try {
-      final List<double> result = await platform.invokeMethod('getOrientation');
+      final Quaternion rotation = await _orientationService.getQuaternion();
       setState(() {
-        _orientation = result;
+        _rotation = rotation.toEulerAngles();
       });
     } on PlatformException catch (e) {
       print(e);
@@ -70,14 +70,18 @@ class _DebugScreenState extends State<DebugScreen> {
 
   @override
   void initState() {
-    platform.invokeMethod('start');
-    _timeString =
-        "${DateTime.now().hour}:${DateTime.now().minute}:${DateTime.now().second}";
+    _orientationService.start();
+    _timeString = _timeService.getCurrentTime();
     if (mounted) {
-      _timer = Timer.periodic(Duration(seconds: 1), (Timer t) => _updateTime());
+      _timer = Timer.periodic(Duration(seconds: 1), (Timer t) => _update());
       _listenLocation();
     }
     super.initState();
+  }
+
+  void _update() async {
+    _updateTime();
+    await _updateDeviceOrientation();
   }
 
   void _updateTime() {
@@ -90,7 +94,7 @@ class _DebugScreenState extends State<DebugScreen> {
   void dispose() {
     _timer.cancel();
     _locationSubscription.cancel();
-    platform.invokeMethod('stop');
+    _orientationService.stop();
     super.dispose();
   }
 
@@ -155,38 +159,22 @@ class _DebugScreenState extends State<DebugScreen> {
                     padding: const EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 20.0),
                     child: Row(
                       children: <Widget>[
-                        IconButton(
-                          icon: Icon(Icons.rotate_right),
-                          onPressed: () {
-                            _getDeviceOrientation().then((res) {
-                              setState(() {
-                                x = (_orientation[0] * 180) / math.pi;
-                                y = (_orientation[1] * 180) / math.pi;
-                                z = ((_orientation[2]) * 180) / math.pi;
-                                w = ((_orientation[3]) * 180) / math.pi;
-                              });
-                            });
-                          },
-                        ),
+                        Icon(Icons.rotate_right),
                         SizedBox(
                           width: 20.0,
                         ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            Text('x: ${x.toStringAsFixed(1)}'),
+                            Text('Pitch: ${degrees(_rotation.pitch).toStringAsFixed(1)}'),
                             SizedBox(
                               width: 20.0,
                             ),
-                            Text('y: ${y.toStringAsFixed(1)}'),
+                            Text('Yaw: ${degrees(_rotation.yaw).toStringAsFixed(1)}'),
                             SizedBox(
                               width: 20.0,
                             ),
-                            Text('z: ${z.toStringAsFixed(1)}'),
-                            SizedBox(
-                              width: 20.0,
-                            ),
-                            Text('w: ${w.toStringAsFixed(1)}'),
+                            Text('Roll: ${degrees(_rotation.roll).toStringAsFixed(1)}'),
                           ],
                         ),
                       ],
