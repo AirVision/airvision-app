@@ -7,8 +7,6 @@ import android.hardware.SensorManager;
 
 import androidx.annotation.NonNull;
 
-import java.util.Arrays;
-
 import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.plugin.common.MethodChannel;
@@ -22,11 +20,11 @@ public class MainActivity extends FlutterActivity implements SensorEventListener
     private Sensor rotationSensor;
     private boolean running;
 
-    private final float[] quaternion = new float[4];
+    private final float[] quaternionWXYZ = new float[4];
 
     public MainActivity() {
         // Initialize as identity quaternion
-        this.quaternion[3] = 1;
+        this.quaternionWXYZ[0] = 1;
     }
 
     @Override
@@ -58,10 +56,11 @@ public class MainActivity extends FlutterActivity implements SensorEventListener
     }
 
     private void getQuaternion(@NonNull MethodChannel.Result result) {
-        final double[] quaternion = new double[this.quaternion.length];
-        for (int i = 0; i < quaternion.length; i++) {
-            quaternion[i] = this.quaternion[i];
-        }
+        final double[] quaternion = new double[4];
+        quaternion[0] = this.quaternionWXYZ[1];
+        quaternion[1] = this.quaternionWXYZ[2];
+        quaternion[2] = this.quaternionWXYZ[3];
+        quaternion[3] = this.quaternionWXYZ[0];
         result.success(quaternion);
     }
 
@@ -87,13 +86,7 @@ public class MainActivity extends FlutterActivity implements SensorEventListener
 
     @Override
     public void onSensorChanged(@NonNull SensorEvent event) {
-        final float[] quaternionWXYZ = new float[4];
-        SensorManager.getQuaternionFromVector(quaternionWXYZ, event.values);
-
-        this.quaternion[0] = quaternionWXYZ[1];
-        this.quaternion[1] = quaternionWXYZ[2];
-        this.quaternion[2] = quaternionWXYZ[3];
-        this.quaternion[3] = quaternionWXYZ[0];
+        SensorManager.getQuaternionFromVector(this.quaternionWXYZ, event.values);
     }
 
     @Override
