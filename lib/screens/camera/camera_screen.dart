@@ -76,7 +76,6 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
   void getCameras() async {
-    print('Start');
     cameras = await availableCameras();
     controller = CameraController(cameras[0], ResolutionPreset.ultraHigh);
 
@@ -95,7 +94,9 @@ class _CameraScreenState extends State<CameraScreen> {
       previewW = math.min(tmp.height, tmp.width);
       screenRatio = screenH / screenW;
       previewRatio = previewH / previewW;
+
       setState(() {});
+
       controller.startImageStream((CameraImage img) {
         if (!isDetecting) {
           isDetecting = true;
@@ -106,10 +107,10 @@ class _CameraScreenState extends State<CameraScreen> {
             model: _model,
             imageHeight: img.height,
             imageWidth: img.width,
-            imageMean: _model == yolo ? 0 : 127.5,
-            imageStd: _model == yolo ? 255.0 : 127.5,
+            imageMean: 0,
+            imageStd: 255.0,
             numResultsPerClass: 1,
-            threshold: _model == yolo ? 0.2 : 0.4,
+            threshold: 0.2,
           ).then((recognitions) {
             updateRecognitions(recognitions, img.height, img.width);
             isDetecting = false;
@@ -134,8 +135,6 @@ class _CameraScreenState extends State<CameraScreen> {
       var aircraftPosition = [_x + (_w / 2), _y + (_h / 2)];
       var aircraftSize = [_w, _h];
 
-      print(_recognitions);
-
       _api
           .getVisibleAircraft(
               time, position, rotation, fov, aircraftPosition, aircraftSize)
@@ -152,7 +151,9 @@ class _CameraScreenState extends State<CameraScreen> {
             ),
             builder: (context) {
               return CustomBottomSheet(res);
-            }).whenComplete(() {});
+            }).whenComplete(() {
+          modalIsOpen = false;
+        });
       });
     }
   }

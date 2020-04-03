@@ -66,9 +66,9 @@ class _MapScreenState extends State<MapScreen> {
         [res.southwest.latitude, res.southwest.longitude]
       ];
 
-      _api.getAll(bounds: bounds).then((aircrafts){
-        print(aircrafts);
-      });
+      // _api.getAll(bounds: bounds).then((aircrafts){
+      //   print(aircrafts.length);
+      // });
       var pinLocationIcon = await BitmapDescriptor.fromAssetImage(
       ImageConfiguration(devicePixelRatio: 2.5),
       'assets/plane.png');

@@ -36,7 +36,6 @@ class _DebugScreenState extends State<DebugScreen> {
   final Location location = Location();
   final TimeService _timeService = TimeService();
 
-  StreamSubscription<GyroscopeEvent> _gyroSubscription;
   StreamSubscription<LocationData> _locationSubscription;
 
   bool loading = false;
@@ -45,8 +44,7 @@ class _DebugScreenState extends State<DebugScreen> {
 
   Future<void> _getDeviceOrientation() async {
     try {
-      final List<double> result =
-          await platform.invokeMethod('getDeviceOrientation');
+      final List<double> result = await platform.invokeMethod('getOrientation');
       setState(() {
         _orientation = result;
       });
@@ -60,17 +58,19 @@ class _DebugScreenState extends State<DebugScreen> {
       setState(() {});
       _locationSubscription.cancel();
     }).listen((LocationData currentLocation) {
-      setState(() {
-        _location = currentLocation;
-        lat = _location.latitude;
-        lon = _location.longitude;
-      });
+      if (mounted) {
+        setState(() {
+          _location = currentLocation;
+          lat = _location.latitude;
+          lon = _location.longitude;
+        });
+      }
     });
   }
 
   @override
   void initState() {
-    platform.invokeMethod('startListeningDeviceOrientation');
+    platform.invokeMethod('start');
     _timeString =
         "${DateTime.now().hour}:${DateTime.now().minute}:${DateTime.now().second}";
     if (mounted) {
@@ -88,11 +88,10 @@ class _DebugScreenState extends State<DebugScreen> {
 
   @override
   void dispose() {
-    super.dispose();
     _timer.cancel();
-    _gyroSubscription.cancel();
     _locationSubscription.cancel();
-    platform.invokeMethod('stopListeningDeviceOrientation');
+    platform.invokeMethod('stop');
+    super.dispose();
   }
 
   @override
@@ -184,7 +183,7 @@ class _DebugScreenState extends State<DebugScreen> {
                               width: 20.0,
                             ),
                             Text('z: ${z.toStringAsFixed(1)}'),
-                             SizedBox(
+                            SizedBox(
                               width: 20.0,
                             ),
                             Text('w: ${w.toStringAsFixed(1)}'),
@@ -212,7 +211,7 @@ class _DebugScreenState extends State<DebugScreen> {
                                 setState(() {
                                   loading = false;
                                 });
-                                var data = jsonDecode(res)['data'][0]['icao24'];
+                                var data = res.length;
                                 Fluttertoast.showToast(
                                     msg:
                                         "Request succesfull first record ICAO is: $data",

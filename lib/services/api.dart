@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:air_vision/models/aircraftState.dart';
 import 'package:http/http.dart' as http;
 import 'package:vector_math/vector_math.dart';
 
@@ -6,7 +7,12 @@ String baseURL = 'https://airvision.seppevolkaerts.be';
 
 class Api {
   Future<dynamic> getVisibleAircraft(
-      int time, List position, Quaternion rotation, List fov, List aircraftPosition, List aircraftSize) async {
+      int time,
+      List position,
+      Quaternion rotation,
+      List fov,
+      List aircraftPosition,
+      List aircraftSize) async {
     Map<String, String> headers = {'Content-Type': 'application/json'};
 
     String body = '''{
@@ -40,13 +46,13 @@ class Api {
     }
   }
 
-  Future<dynamic> getAll({int time, List bounds}) async {
+  Future<List<AircraftState>> getAll({int time, List bounds}) async {
     Map<String, String> headers = {'Content-Type': 'application/json'};
 
     String body = '''{
        "bounds": {
-        "min": ${bounds[0]},
-        "max": ${bounds[1]}
+        "min": ${bounds[1]},
+        "max": ${bounds[0]}
         }
       }
       ''';
@@ -55,9 +61,9 @@ class Api {
       body = '''{
       "time": $time,
       "bounds": {
-        "min": ${bounds[0]},
-        "max": ${bounds[1]}
-      }
+        "min": ${bounds[1]},
+        "max": ${bounds[0]}
+        }
       }
       ''';
     }
@@ -69,7 +75,12 @@ class Api {
     );
 
     if (responseData.statusCode == 200) {
-      return responseData.body;
+      var tagObjsJson = jsonDecode(responseData.body)['data'] as List;
+      List<AircraftState> aircrafts = tagObjsJson
+          .map((tagJson) => AircraftState.fromJson(tagJson))
+          .toList();
+
+      return aircrafts;
     } else {
       return jsonDecode(responseData.body)['error']['message'];
     }
