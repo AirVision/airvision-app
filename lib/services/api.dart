@@ -40,19 +40,24 @@ class Api {
     }
   }
 
-  Future<dynamic> getAll({int time, List position, List bounds}) async {
+  Future<dynamic> getAll({int time, List bounds}) async {
     Map<String, String> headers = {'Content-Type': 'application/json'};
 
     String body = '''{
-      "position": $position,
-      "bounds": $bounds}
+       "bounds": {
+        "min": ${bounds[0]},
+        "max": ${bounds[1]}
+        }
+      }
       ''';
 
     if (time != null) {
       body = '''{
-      "position": $position,
-      "bounds": $bounds,
-      "time": $time
+      "time": $time,
+      "bounds": {
+        "min": ${bounds[0]},
+        "max": ${bounds[1]}
+      }
       }
       ''';
     }

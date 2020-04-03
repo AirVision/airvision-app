@@ -1,5 +1,6 @@
 import 'package:air_vision/screens/camera/camera_screen.dart';
 import 'package:air_vision/screens/debug_screen.dart';
+import 'package:air_vision/services/api.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:async';
@@ -23,10 +24,10 @@ class MapScreen extends StatefulWidget {
 class _MapScreenState extends State<MapScreen> {
   Completer<GoogleMapController> _controller = Completer();
   String _mapStyle;
-  // the user's initial location and current location
   LocationData currentLocation;
-  // wrapper around the location API
   Location location;
+  GoogleMapController controller;
+  Api _api = Api();
 
   @override
   void initState() {
@@ -49,14 +50,29 @@ class _MapScreenState extends State<MapScreen> {
       bearing: CAMERA_BEARING,
       target: LatLng(currentLocation.latitude, currentLocation.longitude),
     );
+    controller = await _controller.future;
 
-    final GoogleMapController controller = await _controller.future;
     controller.animateCamera(CameraUpdate.newCameraPosition(cPosition));
-    controller.getVisibleRegion();
   }
 
   void setInitialLocation() async {
     currentLocation = await location.getLocation();
+  }
+
+  void updateAircrafts() async {
+    controller.getVisibleRegion().then((LatLngBounds res) async {
+      var bounds = [
+        [res.northeast.latitude, res.northeast.longitude],
+        [res.southwest.latitude, res.southwest.longitude]
+      ];
+
+      _api.getAll(bounds: bounds).then((aircrafts){
+        print(aircrafts);
+      });
+      var pinLocationIcon = await BitmapDescriptor.fromAssetImage(
+      ImageConfiguration(devicePixelRatio: 2.5),
+      'assets/plane.png');
+    });
   }
 
   @override
@@ -100,7 +116,6 @@ class _MapScreenState extends State<MapScreen> {
                   ],
                 ),
                 onPressed: () {
-  
                   // Navigator.pushNamed(context, SettingsScreen.id);
                 },
               ),
@@ -144,10 +159,16 @@ class _MapScreenState extends State<MapScreen> {
       body: Stack(
         children: <Widget>[
           GoogleMap(
+              onCameraMove: (CameraPosition cameraPosition) {
+                // cameraPosition will have zoom, tilt, target(LatLng) and bearing
+                updateAircrafts();
+              },
+              buildingsEnabled: true,
               myLocationEnabled: true,
               myLocationButtonEnabled: false,
               compassEnabled: false,
               tiltGesturesEnabled: false,
+              zoomGesturesEnabled: true,
               mapType: MapType.normal,
               initialCameraPosition: initialCameraPosition,
               onMapCreated: (GoogleMapController controller) {
