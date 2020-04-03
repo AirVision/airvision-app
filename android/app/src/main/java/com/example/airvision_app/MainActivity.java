@@ -58,8 +58,10 @@ public class MainActivity extends FlutterActivity implements SensorEventListener
     }
 
     private void getQuaternion(@NonNull MethodChannel.Result result) {
-        final float[] quaternion = Arrays.copyOf(
-                this.quaternion, this.quaternion.length);
+        final double[] quaternion = new double[this.quaternion.length];
+        for (int i = 0; i < quaternion.length; i++) {
+            quaternion[i] = this.quaternion[i];
+        }
         result.success(quaternion);
     }
 
