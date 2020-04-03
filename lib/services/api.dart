@@ -10,7 +10,7 @@ class Api {
       int time,
       List position,
       Quaternion rotation,
-      List fov,
+      Vector2 fov,
       List aircraftPosition,
       List aircraftSize) async {
     Map<String, String> headers = {'Content-Type': 'application/json'};
@@ -24,7 +24,10 @@ class Api {
         ${rotation.z},
         ${rotation.w}
       ],
-      "fov": $fov,
+      "fov": [
+        ${fov.x},
+        ${fov.y}
+      ],
       "aircrafts": [{
         "position": $aircraftPosition, 
         "size": $aircraftSize
