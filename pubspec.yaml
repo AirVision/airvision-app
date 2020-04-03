@@ -22,7 +22,8 @@ dependencies:
   flutter_spinkit: "^4.1.2"
   fluttertoast: ^4.0.1
   permission_handler: ^5.0.0+hotfix.2
-  
+  vector_math: ^2.0.8
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

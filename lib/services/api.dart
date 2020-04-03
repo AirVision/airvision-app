@@ -1,22 +1,22 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'dart:math' as math;
+import 'package:vector_math/vector_math.dart';
 
 String baseURL = 'https://airvision.seppevolkaerts.be';
 
 class Api {
   Future<dynamic> getVisibleAircraft(
-      int time, List position, List rotation, List fov, List aircraftPosition, List aircraftSize) async {
+      int time, List position, Quaternion rotation, List fov, List aircraftPosition, List aircraftSize) async {
     Map<String, String> headers = {'Content-Type': 'application/json'};
 
     String body = '''{
       "time": $time,
       "position": $position,
       "rotation": [
-        ${rotation[0]},
-        ${rotation[1]},
-        ${rotation[2]},
-        ${rotation[3]}
+        ${rotation.x},
+        ${rotation.y},
+        ${rotation.z},
+        ${rotation.w}
       ],
       "fov": $fov,
       "aircrafts": [{
