@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:air_vision/math/geodetic_bounds.dart';
 import 'package:air_vision/models/aircraftState.dart';
 import 'package:http/http.dart' as http;
 import 'package:vector_math/vector_math.dart';
@@ -49,13 +50,13 @@ class Api {
     }
   }
 
-  Future<List<AircraftState>> getAll({int time, List bounds}) async {
+  Future<List<AircraftState>> getAll({int time, GeodeticBounds bounds}) async {
     Map<String, String> headers = {'Content-Type': 'application/json'};
 
     String body = '''{
        "bounds": {
-        "min": ${bounds[1]},
-        "max": ${bounds[0]}
+        "min": ${bounds.min},
+        "max": ${bounds.max}
         }
       }
       ''';
@@ -64,8 +65,8 @@ class Api {
       body = '''{
       "time": $time,
       "bounds": {
-        "min": ${bounds[1]},
-        "max": ${bounds[0]}
+        "min": ${bounds.min},
+        "max": ${bounds.max}
         }
       }
       ''';

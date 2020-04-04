@@ -1,5 +1,7 @@
 import 'dart:typed_data';
 
+import 'package:air_vision/math/geodetic_bounds.dart';
+import 'package:air_vision/math/geodetic_position.dart';
 import 'package:air_vision/screens/camera/camera_screen.dart';
 import 'package:air_vision/screens/debug_screen.dart';
 import 'package:air_vision/services/api.dart';
@@ -89,10 +91,10 @@ class _MapScreenState extends State<MapScreen> {
 
   void updateAircrafts() {
     controller.getVisibleRegion().then((LatLngBounds res) {
-      var bounds = [
-        [res.northeast.latitude, res.northeast.longitude],
-        [res.southwest.latitude, res.southwest.longitude]
-      ];
+      var bounds = GeodeticBounds(
+          min: GeodeticPosition(latitude: res.southwest.latitude, longitude: res.southwest.longitude),
+          max: GeodeticPosition(latitude: res.northeast.latitude, longitude: res.northeast.longitude)
+      );
 
       if (canMakeRequest) {
         canMakeRequest = false;
