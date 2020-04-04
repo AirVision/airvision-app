@@ -13,7 +13,6 @@ import 'package:location/location.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:tflite/tflite.dart';
 import 'dart:math' as math;
-import '../../util/models.dart';
 
 class CameraScreen extends StatefulWidget {
   static const String id = 'camera_screen';
@@ -28,7 +27,7 @@ class _CameraScreenState extends State<CameraScreen> {
   List<dynamic> _recognitions;
   int _imageHeight = 0;
   int _imageWidth = 0;
-  String _model = yolo;
+  String _model = 'Tiny YOLOv2';
 
   StreamSubscription<LocationData> _locationSubscription;
   LocationData _location;
@@ -187,10 +186,10 @@ class _CameraScreenState extends State<CameraScreen> {
 
   @override
   void dispose() {
-    super.dispose();
     _orientationService.stop();
     controller?.dispose();
     _locationSubscription.cancel();
+    super.dispose();
   }
 
   Future<void> checkCameraPermission() async {

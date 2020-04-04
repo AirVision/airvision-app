@@ -1,4 +1,4 @@
-import 'package:air_vision/math/euler_angles.dart';
+import 'package:air_vision/util/math/euler_angles.dart';
 import 'package:vector_math/vector_math.dart';
 import 'dart:math' as math;
 

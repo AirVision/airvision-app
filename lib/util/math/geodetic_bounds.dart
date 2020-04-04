@@ -1,4 +1,4 @@
-import 'package:air_vision/math/geodetic_position.dart';
+import 'package:air_vision/util/math/geodetic_position.dart';
 
 class GeodeticBounds {
 

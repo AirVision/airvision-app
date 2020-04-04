@@ -1,5 +1,6 @@
 import 'dart:convert';
-import 'package:air_vision/math/geodetic_bounds.dart';
+import 'package:air_vision/models/flightInfo.dart';
+import 'package:air_vision/util/math/geodetic_bounds.dart';
 import 'package:air_vision/models/aircraftState.dart';
 import 'package:http/http.dart' as http;
 import 'package:vector_math/vector_math.dart';
@@ -90,11 +91,11 @@ class Api {
     }
   }
 
-  Future<dynamic> getPositionalData(String icao24) async {
+  Future<AircraftState> getPositionalData(String icao24) async {
     Map<String, String> headers = {'Content-Type': 'application/json'};
 
     String body = '''{
-      "icao24": $icao24,
+      "icao24": "$icao24"
     }''';
 
     http.Response responseData = await http.post(
@@ -104,9 +105,12 @@ class Api {
     );
 
     if (responseData.statusCode == 200) {
-      return responseData.body;
+      var tagObjsJson = jsonDecode(responseData.body)["data"];
+      AircraftState aircrafts = AircraftState.fromJson(tagObjsJson);
+
+      return aircrafts;
     } else {
-      return jsonDecode(responseData.body)['error']['message'];
+      return null;
     }
   }
 
@@ -130,11 +134,11 @@ class Api {
     }
   }
 
-  Future<dynamic> getSpecificFlightInfo(String icao24) async {
+  Future<FlightInfo> getSpecificFlightInfo(String icao24) async {
     Map<String, String> headers = {'Content-Type': 'application/json'};
 
     String body = '''{
-      "icao24": $icao24,
+      "icao24": "$icao24"
     }''';
 
     http.Response responseData = await http.post(
@@ -144,9 +148,14 @@ class Api {
     );
 
     if (responseData.statusCode == 200) {
-      return responseData.body;
+      var tagObjsJson = jsonDecode(responseData.body)["data"];
+      print(responseData.body);
+      FlightInfo flight = FlightInfo.fromJson(tagObjsJson);
+
+      return flight;
     } else {
-      return jsonDecode(responseData.body)['error']['message'];
+      print(jsonDecode(responseData.body)['error']['message']);
+      return null;
     }
   }
 }

@@ -1,25 +1,38 @@
 import 'package:air_vision/models/aircraftState.dart';
+import 'package:air_vision/models/flightInfo.dart';
+import 'package:air_vision/services/api.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import './customListTile.dart';
 
 class CustomBottomSheet extends StatefulWidget {
-  // final AircraftState state;
+  final AircraftState aircraft;
 
-  // const CustomBottomSheet({this.state});
-
-  final dynamic res;
-
-  const CustomBottomSheet(this.res);
-
+  const CustomBottomSheet(this.aircraft);
 
   @override
   _CustomBottomSheetState createState() => _CustomBottomSheetState();
 }
 
 class _CustomBottomSheetState extends State<CustomBottomSheet> {
+  Api _api = Api();
+  FlightInfo info;
+
+  @override
+  void initState() {
+    super.initState();
+    _api.getSpecificFlightInfo(widget.aircraft.icao24).then((res) {
+      setState(() {
+        info = res;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    double knots = widget.aircraft.velocity * 1.94384;
+    double vKnots = widget.aircraft.verticalRate * 1.94384;
+
     return Column(
       children: <Widget>[
         ClipRRect(
@@ -45,7 +58,7 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                     height: 10.0,
                   ),
                   Text(
-                    "FLIGHT: LX856",
+                    "${info != null ? info.number != null? 'Flight number: ' +  info.number: info.arrivalAirport != null && info.departureAirport != null? info.departureAirport.iata + ' → ' + info.arrivalAirport.iata : 'Flight information': 'Flight information'}",
                     style: TextStyle(color: Colors.white, letterSpacing: 4),
                   )
                 ],
@@ -55,14 +68,40 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
         ),
         Expanded(
           child: ListView(children: <Widget>[
-            SizedBox(
-              height: 10.0,
-            ),
-            Text(widget.res),
-            // CustomListTile(FontAwesomeIcons.plane, widget.state.icao24),
-            SizedBox(
-              height: 10.0,
-            ),
+            CustomListTile(Icons.label, widget.aircraft.icao24),
+            CustomListTile(
+                Icons.location_on,
+                (widget.aircraft.position[0].toStringAsFixed(3) +
+                    ', ' +
+                    widget.aircraft.position[1].toStringAsFixed(3) +
+                    ', ' +
+                    widget.aircraft.position[2].toStringAsFixed(1) +
+                    'm')),
+            widget.aircraft.velocity != null
+                ? CustomListTile(
+                    Icons.network_check,
+                    widget.aircraft.velocity.toStringAsFixed(2) +
+                        ' m/s, ' +
+                        knots.toStringAsFixed(2) +
+                        ' kt')
+                : Container(),
+            widget.aircraft.verticalRate != null
+                ? CustomListTile(
+                    Icons.flight_takeoff,
+                    widget.aircraft.verticalRate.toStringAsFixed(2) +
+                        ' m/s, ' +
+                        vKnots.toStringAsFixed(2) +
+                        ' kt')
+                : Container(),
+            info != null
+                ? Column(
+                    children: <Widget>[
+                      CustomListTile(Icons.check_circle,
+                          'Request succesfull - ' + info.arrivalAirport.name),
+                    ],
+                  )
+                : CustomListTile(
+                    Icons.error, 'No additional information found'),
           ]),
         ),
       ],

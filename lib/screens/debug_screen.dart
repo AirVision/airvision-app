@@ -1,18 +1,15 @@
 import 'dart:async';
-import 'dart:convert';
-
-import 'package:air_vision/math/euler_angles.dart';
+import 'package:air_vision/util/math/euler_angles.dart';
 import 'package:air_vision/services/api.dart';
 import 'package:air_vision/services/orientation_service.dart';
 import 'package:air_vision/services/time_service.dart';
-import 'package:air_vision/math/quaternion.dart';
+import 'package:air_vision/util/math/quaternion.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:location/location.dart';
-import 'package:sensors/sensors.dart';
 import 'package:vector_math/vector_math.dart' show Quaternion, degrees;
 
 class DebugScreen extends StatefulWidget {

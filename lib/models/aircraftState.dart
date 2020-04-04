@@ -21,4 +21,5 @@ class AircraftState {
       json['heading'] as double,
     );
   }
+
 }
