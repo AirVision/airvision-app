@@ -97,26 +97,28 @@ class _CameraScreenState extends State<CameraScreen> {
 
       setState(() {});
 
-      controller.startImageStream((CameraImage img) {
-        if (!isDetecting) {
-          isDetecting = true;
-          Tflite.detectObjectOnFrame(
-            bytesList: img.planes.map((plane) {
-              return plane.bytes;
-            }).toList(),
-            model: _model,
-            imageHeight: img.height,
-            imageWidth: img.width,
-            imageMean: 0,
-            imageStd: 255.0,
-            numResultsPerClass: 1,
-            threshold: 0.2,
-          ).then((recognitions) {
-            updateRecognitions(recognitions, img.height, img.width);
-            isDetecting = false;
-          });
-        }
-      });
+      if (mounted) {
+        controller.startImageStream((CameraImage img) {
+          if (!isDetecting) {
+            isDetecting = true;
+            Tflite.detectObjectOnFrame(
+              bytesList: img.planes.map((plane) {
+                return plane.bytes;
+              }).toList(),
+              model: _model,
+              imageHeight: img.height,
+              imageWidth: img.width,
+              imageMean: 0,
+              imageStd: 255.0,
+              numResultsPerClass: 1,
+              threshold: 0.2,
+            ).then((recognitions) {
+              updateRecognitions(recognitions, img.height, img.width);
+              isDetecting = false;
+            });
+          }
+        });
+      }
     });
   }
 
@@ -159,19 +161,21 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
   updateRecognitions(List recognitions, h, w) {
-    setState(() {
-      _recognitions = recognitions;
-      _imageHeight = h;
-      _imageWidth = w;
-      if (recognitions.length > 0 &&
-          recognitions[0]["detectedClass"] == "aircraft") {
-        infoText = "Scan aircraft";
-        detectedAircraft = true;
-      } else {
-        infoText = "Find Aircraft";
-        detectedAircraft = false;
-      }
-    });
+    if (mounted) {
+      setState(() {
+        _recognitions = recognitions;
+        _imageHeight = h;
+        _imageWidth = w;
+        if (recognitions.length > 0 &&
+            recognitions[0]["detectedClass"] == "aircraft") {
+          infoText = "Scan aircraft";
+          detectedAircraft = true;
+        } else {
+          infoText = "Find Aircraft";
+          detectedAircraft = false;
+        }
+      });
+    }
   }
 
   @override
@@ -195,15 +199,17 @@ class _CameraScreenState extends State<CameraScreen> {
   Future<void> checkCameraPermission() async {
     var status = await Permission.camera.status;
 
-    if (status.isUndetermined || status.isDenied) {
-      setState(() {
-        gotCameraPermission = false;
-      });
-    }
-    if (status.isGranted) {
-      setState(() {
-        gotCameraPermission = true;
-      });
+    if (mounted) {
+      if (status.isUndetermined || status.isDenied) {
+        setState(() {
+          gotCameraPermission = false;
+        });
+      }
+      if (status.isGranted) {
+        setState(() {
+          gotCameraPermission = true;
+        });
+      }
     }
   }
 
@@ -215,20 +221,6 @@ class _CameraScreenState extends State<CameraScreen> {
 
     return controller != null && controller.value.isInitialized
         ? Scaffold(
-            appBar: AppBar(
-              title: Text(
-                'Find aircraft',
-                style: TextStyle(color: Colors.black),
-              ),
-              centerTitle: true,
-              backgroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.vertical(
-                  bottom: Radius.circular(15),
-                ),
-              ),
-              iconTheme: IconThemeData(color: Colors.black),
-            ),
             body: gotCameraPermission
                 ? Stack(
                     children: [

@@ -22,8 +22,15 @@ class _CustomListTileState extends State<CustomListTile> {
           ),
           Container(
             decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0xffE9E9E9),
+                  blurRadius: 5.0, // has the effect of softening the shadow
+                  spreadRadius: 0.0, // has the effect of extending the shadow
+                )
+              ],
               borderRadius: BorderRadius.circular(8),
-              color: Color(0xffF6F6F6),
+              color: Colors.white,
             ),
             child: ListTile(
               leading: Icon(

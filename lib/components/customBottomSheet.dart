@@ -39,27 +39,30 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
           borderRadius: BorderRadius.only(
               topRight: Radius.circular(20.0), topLeft: Radius.circular(20)),
           child: Container(
-            color: Colors.blue,
+            color: Colors.white,
             height: 70.0,
             child: Padding(
               padding: const EdgeInsets.only(top: 8.0),
               child: Column(
                 children: <Widget>[
-                  Align(
-                    alignment: Alignment.topCenter,
-                    child: Divider(
-                      color: Colors.white,
-                      thickness: 3.0,
-                      endIndent: 130.0,
-                      indent: 130.0,
-                    ),
-                  ),
                   SizedBox(
                     height: 10.0,
                   ),
                   Text(
-                    "${info != null ? info.number != null? 'Flight number: ' +  info.number: info.arrivalAirport != null && info.departureAirport != null? info.departureAirport.iata + ' → ' + info.arrivalAirport.iata : 'Flight information': 'Flight information'}",
-                    style: TextStyle(color: Colors.white, letterSpacing: 4),
+                    "FLIGHT INFORMATION",
+                    style: TextStyle(color: Colors.black, fontSize: 18.0, fontWeight: FontWeight.w600),
+                  ),
+                  SizedBox(
+                    height: 7.0,
+                  ),
+                  Align(
+                    alignment: Alignment.topCenter,
+                    child: Divider(
+                      color: Colors.black,
+                      thickness: 3.0,
+                      endIndent: 150.0,
+                      indent: 150.0,
+                    ),
                   )
                 ],
               ),
