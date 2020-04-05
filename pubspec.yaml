@@ -23,7 +23,8 @@ dependencies:
   fluttertoast: ^4.0.1
   permission_handler: ^5.0.0+hotfix.2
   vector_math: ^2.0.8
-
+  bottom_navy_bar: ^5.3.2
+  line_icons: ^0.2.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

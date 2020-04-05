@@ -20,7 +20,6 @@ class DebugScreen extends StatefulWidget {
 }
 
 class _DebugScreenState extends State<DebugScreen> {
-
   final OrientationService _orientationService = OrientationService();
 
   double lat = -0;
@@ -32,11 +31,9 @@ class _DebugScreenState extends State<DebugScreen> {
   LocationData _location;
   final Location location = Location();
   final TimeService _timeService = TimeService();
-
   StreamSubscription<LocationData> _locationSubscription;
 
   bool loading = false;
-
   EulerAngles _rotation = EulerAngles.zero();
 
   Future<void> _updateDeviceOrientation() async {
@@ -97,132 +94,214 @@ class _DebugScreenState extends State<DebugScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Debug',
-          style: TextStyle(color: Colors.black87),
-        ),
-        centerTitle: true,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-            bottom: Radius.circular(15),
-          ),
-        ),
-        backgroundColor: Colors.white,
-        iconTheme: IconThemeData(color: Colors.black),
-      ),
-      body: Stack(
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 20.0),
-                    child: Row(
+    return SafeArea(
+      child: Scaffold(
+        body: Stack(
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  SizedBox(
+                    height: 25.0,
+                  ),
+                  Container(
+                    height: 200,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage("assets/debug.png"),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        Icon(Icons.access_time),
-                        SizedBox(
-                          width: 20.0,
+                        Text(
+                          _timeString,
+                          style: TextStyle(
+                              fontSize: 64.0,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xff293A4F),
+                              letterSpacing: 2.0),
                         ),
-                        Text(_timeString),
+                        SizedBox(
+                          height: 10.0,
+                        ),
+                        Text(
+                          "DEBUGGING...",
+                          style: TextStyle(
+                              fontSize: 14.0,
+                              letterSpacing: 2.0,
+                              color: Color(0xff293A4F)),
+                        )
                       ],
                     ),
                   ),
-                ),
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 20.0),
-                    child: Row(
+                  SizedBox(
+                    height: 25.0,
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                          color: Color(0xffE9E9E9),
+                          blurRadius:
+                              5.0, // has the effect of softening the shadow
+                          spreadRadius:
+                              0.0, // has the effect of extending the shadow
+                        )
+                      ],
+                      borderRadius: BorderRadius.circular(8),
+                      color: Colors.white,
+                    ),
+                    child: Stack(
                       children: <Widget>[
-                        Icon(Icons.location_on),
-                        SizedBox(
-                          width: 20.0,
+                        Padding(
+                          padding:
+                              const EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 20.0),
+                          child: Row(
+                            children: <Widget>[
+                              Icon(FontAwesomeIcons.mapPin),
+                              SizedBox(
+                                width: 20.0,
+                              ),
+                              Text('Latitude: ${lat.toStringAsFixed(2)}'),
+                              SizedBox(
+                                width: 20.0,
+                              ),
+                              Text('Longitude: ${lon.toStringAsFixed(2)}'),
+                            ],
+                          ),
                         ),
-                        Text('Lat: ${lat.toStringAsFixed(2)}'),
-                        SizedBox(
-                          width: 20.0,
-                        ),
-                        Text('Lon: ${lon.toStringAsFixed(2)}'),
+                        Positioned(
+                          child: Text(
+                            'Location',
+                            style: TextStyle(fontWeight: FontWeight.w500),
+                          ),
+                          top: 7,
+                          right: 10,
+                        )
                       ],
                     ),
                   ),
-                ),
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 20.0),
-                    child: Row(
-                      children: <Widget>[
-                        Icon(Icons.rotate_right),
-                        SizedBox(
-                          width: 20.0,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Text('Pitch: ${degrees(_rotation.pitch).toStringAsFixed(1)}'),
+                  SizedBox(
+                    height: 15.0,
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                          color: Color(0xffE9E9E9),
+                          blurRadius:
+                              5.0, // has the effect of softening the shadow
+                          spreadRadius:
+                              0.0, // has the effect of extending the shadow
+                        )
+                      ],
+                      borderRadius: BorderRadius.circular(8),
+                      color: Colors.white,
+                    ),
+                    child: Stack(children: <Widget>[
+                      Padding(
+                        padding:
+                            const EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 20.0),
+                        child: Row(
+                          children: <Widget>[
+                            Icon(FontAwesomeIcons.compass),
                             SizedBox(
                               width: 20.0,
                             ),
-                            Text('Yaw: ${degrees(_rotation.yaw).toStringAsFixed(1)}'),
-                            SizedBox(
-                              width: 20.0,
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Text(
+                                    'Pitch: ${degrees(_rotation.pitch).toStringAsFixed(1)}'),
+                                SizedBox(
+                                  width: 20.0,
+                                ),
+                                Text(
+                                    'Yaw: ${degrees(_rotation.yaw).toStringAsFixed(1)}'),
+                                SizedBox(
+                                  width: 20.0,
+                                ),
+                                Text(
+                                    'Roll: ${degrees(_rotation.roll).toStringAsFixed(1)}'),
+                              ],
                             ),
-                            Text('Roll: ${degrees(_rotation.roll).toStringAsFixed(1)}'),
                           ],
                         ),
-                      ],
-                    ),
-                  ),
-                ),
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 20.0),
-                    child: Row(
-                      children: <Widget>[
-                        Icon(FontAwesomeIcons.server),
-                        SizedBox(
-                          width: 20.0,
+                      ),
+                      Positioned(
+                        child: Text(
+                          'Orientation',
+                          style: TextStyle(fontWeight: FontWeight.w500),
                         ),
-                        FlatButton(
-                            onPressed: () {
-                              setState(() {
-                                loading = true;
-                              });
-                              _api.getAll().then((res) {
-                                setState(() {
-                                  loading = false;
-                                });
-                                var data = res.length;
-                                Fluttertoast.showToast(
-                                    msg:
-                                        "Request succesfull first record ICAO is: $data",
-                                    toastLength: Toast.LENGTH_LONG,
-                                    gravity: ToastGravity.BOTTOM,
-                                    timeInSecForIosWeb: 1,
-                                    textColor: Colors.white,
-                                    fontSize: 16.0);
-                              });
-                            },
-                            child: Text('Request /all'))
-                      ],
+                        top: 7,
+                        right: 10,
+                      )
+                    ]),
+                  ),
+                  SizedBox(
+                    height: 15.0,
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        loading = true;
+                      });
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        boxShadow: [
+                          BoxShadow(
+                            color: Color(0xffE9E9E9),
+                            blurRadius:
+                                5.0, // has the effect of softening the shadow
+                            spreadRadius:
+                                0.0, // has the effect of extending the shadow
+                          )
+                        ],
+                        borderRadius: BorderRadius.circular(8),
+                        color: Colors.white,
+                      ),
+                      child: Stack(children: <Widget>[
+                        Padding(
+                          padding:
+                              const EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 20.0),
+                          child: Row(
+                            children: <Widget>[
+                              Icon(Icons.network_check),
+                              SizedBox(
+                                width: 20.0,
+                              ),
+                              Text('Request server status')
+                            ],
+                          ),
+                        ),
+                        Positioned(
+                          child: Text(
+                            'Status',
+                            style: TextStyle(fontWeight: FontWeight.w500),
+                          ),
+                          top: 7,
+                          right: 10,
+                        )
+                      ]),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          Visibility(
-            visible: loading ? true : false,
-            child: SpinKitRing(
-              color: Theme.of(context).primaryColor,
-              size: 50.0,
-            ),
-          )
-        ],
+            Visibility(
+              visible: loading ? true : false,
+              child: SpinKitRing(
+                color: Theme.of(context).primaryColor,
+                size: 50.0,
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

@@ -51,7 +51,7 @@ class _CameraScreenState extends State<CameraScreen> {
   bool isDetecting = false;
   bool modalIsOpen = false;
   bool detectedAircraft = false;
-  String infoText = "Find Aircraft";
+  String infoText = "Searching...";
 
   bool gotCameraPermission = false;
 
@@ -97,26 +97,28 @@ class _CameraScreenState extends State<CameraScreen> {
 
       setState(() {});
 
-      controller.startImageStream((CameraImage img) {
-        if (!isDetecting) {
-          isDetecting = true;
-          Tflite.detectObjectOnFrame(
-            bytesList: img.planes.map((plane) {
-              return plane.bytes;
-            }).toList(),
-            model: _model,
-            imageHeight: img.height,
-            imageWidth: img.width,
-            imageMean: 0,
-            imageStd: 255.0,
-            numResultsPerClass: 1,
-            threshold: 0.2,
-          ).then((recognitions) {
-            updateRecognitions(recognitions, img.height, img.width);
-            isDetecting = false;
-          });
-        }
-      });
+      if (mounted) {
+        controller.startImageStream((CameraImage img) {
+          if (!isDetecting) {
+            isDetecting = true;
+            Tflite.detectObjectOnFrame(
+              bytesList: img.planes.map((plane) {
+                return plane.bytes;
+              }).toList(),
+              model: _model,
+              imageHeight: img.height,
+              imageWidth: img.width,
+              imageMean: 0,
+              imageStd: 255.0,
+              numResultsPerClass: 1,
+              threshold: 0.2,
+            ).then((recognitions) {
+              updateRecognitions(recognitions, img.height, img.width);
+              isDetecting = false;
+            });
+          }
+        });
+      }
     });
   }
 
@@ -159,19 +161,21 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
   updateRecognitions(List recognitions, h, w) {
-    setState(() {
-      _recognitions = recognitions;
-      _imageHeight = h;
-      _imageWidth = w;
-      if (recognitions.length > 0 &&
-          recognitions[0]["detectedClass"] == "aircraft") {
-        infoText = "Scan aircraft";
-        detectedAircraft = true;
-      } else {
-        infoText = "Find Aircraft";
-        detectedAircraft = false;
-      }
-    });
+    if (mounted) {
+      setState(() {
+        _recognitions = recognitions;
+        _imageHeight = h;
+        _imageWidth = w;
+        if (recognitions.length > 0 &&
+            recognitions[0]["detectedClass"] == "aircraft") {
+          infoText = "Press To Scan";
+          detectedAircraft = true;
+        } else {
+          infoText = "Searching...";
+          detectedAircraft = false;
+        }
+      });
+    }
   }
 
   @override
@@ -195,15 +199,17 @@ class _CameraScreenState extends State<CameraScreen> {
   Future<void> checkCameraPermission() async {
     var status = await Permission.camera.status;
 
-    if (status.isUndetermined || status.isDenied) {
-      setState(() {
-        gotCameraPermission = false;
-      });
-    }
-    if (status.isGranted) {
-      setState(() {
-        gotCameraPermission = true;
-      });
+    if (mounted) {
+      if (status.isUndetermined || status.isDenied) {
+        setState(() {
+          gotCameraPermission = false;
+        });
+      }
+      if (status.isGranted) {
+        setState(() {
+          gotCameraPermission = true;
+        });
+      }
     }
   }
 
@@ -215,20 +221,6 @@ class _CameraScreenState extends State<CameraScreen> {
 
     return controller != null && controller.value.isInitialized
         ? Scaffold(
-            appBar: AppBar(
-              title: Text(
-                'Find aircraft',
-                style: TextStyle(color: Colors.black),
-              ),
-              centerTitle: true,
-              backgroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.vertical(
-                  bottom: Radius.circular(15),
-                ),
-              ),
-              iconTheme: IconThemeData(color: Colors.black),
-            ),
             body: gotCameraPermission
                 ? Stack(
                     children: [
@@ -251,39 +243,45 @@ class _CameraScreenState extends State<CameraScreen> {
                         padding: const EdgeInsets.only(bottom: 40.0),
                         child: Align(
                           alignment: Alignment.bottomCenter,
-                          child: Opacity(
-                            opacity: detectedAircraft ? 1.0 : 0.8,
-                            child: GestureDetector(
-                              onTap: () {
-                                if (detectedAircraft)
-                                  scanAirplane(
-                                      math.max(_imageHeight, _imageWidth),
-                                      math.min(_imageHeight, _imageWidth),
-                                      screen.height,
-                                      screen.width);
-                              },
-                              child: Container(
-                                width: 180.0,
-                                height: 50.0,
-                                decoration: BoxDecoration(
-                                    color: Color(0xff3496F7),
-                                    borderRadius: BorderRadius.circular(20.0)),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: <Widget>[
-                                    Icon(
-                                      Icons.info_outline,
-                                      color: Colors.white,
-                                    ),
-                                    SizedBox(
-                                      width: 5.0,
-                                    ),
-                                    Text(
-                                      infoText,
-                                      style: TextStyle(color: Colors.white),
+                          child: GestureDetector(
+                            onTap: () {
+                              if (detectedAircraft)
+                                scanAirplane(
+                                    math.max(_imageHeight, _imageWidth),
+                                    math.min(_imageHeight, _imageWidth),
+                                    screen.height,
+                                    screen.width);
+                            },
+                            child: Container(
+                              width: 160.0,
+                              height: 50.0,
+                              decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.25),
+                                      blurRadius:
+                                          5.0, // has the effect of softening the shadow
+                                      spreadRadius:
+                                          0.0, // has the effect of extending the shadow
                                     )
                                   ],
-                                ),
+                                  borderRadius: BorderRadius.circular(10.0)),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: <Widget>[
+                                  Icon(
+                                    Icons.search,
+                                    color: Colors.black,
+                                  ),
+                                  SizedBox(
+                                    width: 5.0,
+                                  ),
+                                  Text(
+                                    infoText,
+                                    style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500, fontSize: 14),
+                                  )
+                                ],
                               ),
                             ),
                           ),
