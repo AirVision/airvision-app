@@ -186,20 +186,24 @@ class _MapScreenState extends State<MapScreen> {
               _controller.complete(controller);
             },
           ),
-          Positioned(
-            right: 10,
-            top: 35.0,
-            child: Container(
-              height: 50,
-              width: 50,
-              color: Colors.white,
-              child: IconButton(
-                onPressed: () {
-                  setUserLocation();
-                },
-                icon: Icon(Icons.my_location),
-              ),
-            ),
+          SafeArea(
+                      child: Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: Align(
+                          alignment: Alignment.topRight,
+                                                child: Container(
+                            height: 50,
+                            width: 50,
+                            color: Colors.white,
+                            child: IconButton(
+                              onPressed: () {
+                                setUserLocation();
+                              },
+                              icon: Icon(Icons.my_location),
+                            ),
+                          ),
+                        ),
+                      ),
           ),
         ],
       ),
