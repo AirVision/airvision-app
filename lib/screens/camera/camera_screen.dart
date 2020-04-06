@@ -140,9 +140,8 @@ class _CameraScreenState extends State<CameraScreen> {
       _api
           .getVisibleAircraft(
               time, position, rotation, fov, aircraftPosition, aircraftSize)
-          .then((res) {
+          .then((aircrafts) {
         modalIsOpen = true;
-        print(jsonDecode(res));
 
         showModalBottomSheet(
             context: context,
@@ -152,10 +151,12 @@ class _CameraScreenState extends State<CameraScreen> {
                   topLeft: Radius.circular(20)),
             ),
             builder: (context) {
-              return CustomBottomSheet(res);
+              return CustomBottomSheet(aircrafts.first);
             }).whenComplete(() {
           modalIsOpen = false;
         });
+      }).catchError((onError){
+        
       });
     }
   }

@@ -24,7 +24,7 @@ class _CustomListTileState extends State<CustomListTile> {
             decoration: BoxDecoration(
               boxShadow: [
                 BoxShadow(
-                  color: Color(0xffE9E9E9),
+                  color: Colors.black.withOpacity(0.15),
                   blurRadius: 5.0, // has the effect of softening the shadow
                   spreadRadius: 0.0, // has the effect of extending the shadow
                 )

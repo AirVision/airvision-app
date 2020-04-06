@@ -6,6 +6,7 @@ import 'package:air_vision/screens/camera/camera_screen.dart';
 import 'package:air_vision/screens/debug_screen.dart';
 import 'package:air_vision/services/api.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:async';
 import 'package:flutter/services.dart' show rootBundle;
@@ -60,14 +61,14 @@ class _MapScreenState extends State<MapScreen> {
     setUserLocation();
     _timer = Timer.periodic(
         Duration(seconds: 1), (Timer t) => canMakeRequest = true);
-    location = new Location();
-    rootBundle.loadString('assets/mapStyle.txt').then((string) {
+
+    rootBundle.loadString('assets/mapStyle2.txt').then((string) {
       _mapStyle = string;
     });
-    setUserLocation();
   }
 
   void setUserLocation() async {
+    location = Location();
     currentLocation = await location.getLocation();
 
     CameraPosition cPosition = CameraPosition(
@@ -119,6 +120,15 @@ class _MapScreenState extends State<MapScreen> {
                               return CustomBottomSheet(aircraft);
                             }).whenComplete(() {});
                       }
+                    }).catchError((e) {
+                      Fluttertoast.showToast(
+                          msg: "No information found",
+                          toastLength: Toast.LENGTH_SHORT,
+                          gravity: ToastGravity.TOP,
+                          timeInSecForIosWeb: 1,
+                          backgroundColor: Colors.red,
+                          textColor: Colors.white,
+                          fontSize: 16.0);
                     });
                   });
               setState(() {

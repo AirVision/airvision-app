@@ -8,7 +8,7 @@ import 'package:vector_math/vector_math.dart';
 String baseURL = 'https://airvision.seppevolkaerts.be';
 
 class Api {
-  Future<dynamic> getVisibleAircraft(
+  Future<List<AircraftState>> getVisibleAircraft(
       int time,
       List position,
       Quaternion rotation,
@@ -45,7 +45,12 @@ class Api {
     );
 
     if (responseData.statusCode == 200) {
-      return responseData.body;
+      var tagObjsJson = jsonDecode(responseData.body)['data'] as List;
+      List<AircraftState> aircrafts = tagObjsJson
+          .map((tagJson) => AircraftState.fromJson(tagJson))
+          .toList();
+
+      return aircrafts;
     } else {
       return jsonDecode(responseData.body)['error']['message'];
     }
@@ -87,7 +92,7 @@ class Api {
 
       return aircrafts;
     } else {
-      return jsonDecode(responseData.body)['error']['message'];
+      return Future.error(jsonDecode(responseData.body)['error']['message']);
     }
   }
 
@@ -107,10 +112,9 @@ class Api {
     if (responseData.statusCode == 200) {
       var tagObjsJson = jsonDecode(responseData.body)["data"];
       AircraftState aircrafts = AircraftState.fromJson(tagObjsJson);
-
       return aircrafts;
     } else {
-      return null;
+      return Future.error(jsonDecode(responseData.body)['error']['message']);
     }
   }
 
@@ -149,13 +153,9 @@ class Api {
 
     if (responseData.statusCode == 200) {
       var tagObjsJson = jsonDecode(responseData.body)["data"];
-      print(responseData.body);
       FlightInfo flight = FlightInfo.fromJson(tagObjsJson);
 
       return flight;
-    } else {
-      print(jsonDecode(responseData.body)['error']['message']);
-      return null;
     }
   }
 }
