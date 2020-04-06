@@ -1,7 +1,7 @@
 import 'package:air_vision/screens/camera/camera_screen.dart';
 import 'package:air_vision/screens/debug_screen.dart';
 import 'package:air_vision/screens/map_screen.dart';
-import 'package:air_vision/screens/settings_screen.dart';
+import 'package:air_vision/screens/profile_screen.dart';
 import 'package:bottom_navy_bar/bottom_navy_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -16,13 +16,6 @@ class AirVision extends StatelessWidget {
       title: 'Air Vision',
       theme: ThemeData(
           primaryColor: Color(0xFF3496F7), accentColor: Color(0xFF3496F7)),
-      // initialRoute: MapScreen.id,
-      // routes: {
-      //   MapScreen.id: (context) => MapScreen(),
-      //   CameraScreen.id: (context) => CameraScreen(),
-      //   SettingsScreen.id: (context) => SettingsScreen(),
-      //   DebugScreen.id: (context) => DebugScreen()
-      // },
       home: MyHomePage(
         title: "home",
       ),
@@ -56,12 +49,7 @@ class _MyHomePageState extends State<MyHomePage> {
         children: <Widget>[
           MapScreen(),
           CameraScreen(),
-          Container(
-            child: Center(
-              child: Text("Profile page WIP"),
-            ),
-            color: Colors.greenAccent,
-          ),
+          ProfileScreen(),
           DebugScreen()
         ],
       ),
@@ -81,7 +69,7 @@ class _MyHomePageState extends State<MyHomePage> {
           BottomNavyBarItem(
               icon: Icon(FontAwesomeIcons.globeEurope),
               title: Text('Home'),
-              activeColor: Colors.purple,
+              activeColor: Colors.lightBlue,
               textAlign: TextAlign.center,
               inactiveColor: Color(0xff1B2531)),
           BottomNavyBarItem(
@@ -95,13 +83,13 @@ class _MyHomePageState extends State<MyHomePage> {
               title: Text(
                 'Profile',
               ),
-              activeColor: Colors.green,
+              activeColor: Colors.lightBlue,
               textAlign: TextAlign.center,
               inactiveColor: Color(0xff1B2531)),
           BottomNavyBarItem(
               icon: Icon(Icons.bug_report),
               title: Text('Debug'),
-              activeColor: Colors.red,
+              activeColor: Colors.lightBlue,
               textAlign: TextAlign.center,
               inactiveColor: Color(0xff1B2531)),
         ],

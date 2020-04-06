@@ -1,19 +1,17 @@
 import 'package:flutter/material.dart';
 
-class SettingsScreen extends StatefulWidget {
-  static const String id = 'settings_screen';
-
+class ProfileScreen extends StatefulWidget {
   @override
-  _SettingsScreenState createState() => _SettingsScreenState();
+  _ProfileScreenState createState() => _ProfileScreenState();
 }
 
-class _SettingsScreenState extends State<SettingsScreen> {
+class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Settings',
+          'Profile',
           style: TextStyle(color: Colors.black),
         ),
         centerTitle: true,

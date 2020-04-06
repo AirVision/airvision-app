@@ -57,33 +57,29 @@ class _MapScreenState extends State<MapScreen> {
   @override
   void initState() {
     super.initState();
-    getCustomMarker(250);
-
+    setUserLocation();
     _timer = Timer.periodic(
         Duration(seconds: 1), (Timer t) => canMakeRequest = true);
     location = new Location();
     rootBundle.loadString('assets/mapStyle.txt').then((string) {
       _mapStyle = string;
     });
-    setInitialLocation().then((data) {
-      setUserLocation();
-    });
+    setUserLocation();
   }
 
   void setUserLocation() async {
+    currentLocation = await location.getLocation();
+
     CameraPosition cPosition = CameraPosition(
       zoom: CAMERA_ZOOM,
       tilt: CAMERA_TILT,
       bearing: CAMERA_BEARING,
       target: LatLng(currentLocation.latitude, currentLocation.longitude),
     );
+
     controller = await _controller.future;
 
     controller.animateCamera(CameraUpdate.newCameraPosition(cPosition));
-  }
-
-  Future<void> setInitialLocation() async {
-    currentLocation = await location.getLocation();
   }
 
   void updateAircrafts() {
@@ -187,23 +183,23 @@ class _MapScreenState extends State<MapScreen> {
             },
           ),
           SafeArea(
-                      child: Padding(
-                        padding: const EdgeInsets.all(20.0),
-                        child: Align(
-                          alignment: Alignment.topRight,
-                                                child: Container(
-                            height: 50,
-                            width: 50,
-                            color: Colors.white,
-                            child: IconButton(
-                              onPressed: () {
-                                setUserLocation();
-                              },
-                              icon: Icon(Icons.my_location),
-                            ),
-                          ),
-                        ),
-                      ),
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Align(
+                alignment: Alignment.topRight,
+                child: Container(
+                  height: 50,
+                  width: 50,
+                  color: Colors.white,
+                  child: IconButton(
+                    onPressed: () {
+                      setUserLocation();
+                    },
+                    icon: Icon(Icons.my_location),
+                  ),
+                ),
+              ),
+            ),
           ),
         ],
       ),
