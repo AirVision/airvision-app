@@ -43,7 +43,6 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
               topRight: Radius.circular(20.0), topLeft: Radius.circular(20)),
           child: Container(
             color: Colors.white,
-            height: 80.0,
             child: Padding(
               padding: const EdgeInsets.only(top: 8.0),
               child: Column(

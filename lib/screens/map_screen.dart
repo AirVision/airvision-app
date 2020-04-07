@@ -1,9 +1,6 @@
 import 'dart:typed_data';
-
 import 'package:air_vision/util/math/geodetic_bounds.dart';
 import 'package:air_vision/util/math/geodetic_position.dart';
-import 'package:air_vision/screens/camera/camera_screen.dart';
-import 'package:air_vision/screens/debug_screen.dart';
 import 'package:air_vision/services/api.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -27,19 +24,26 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
+  // Used for google maps
   Completer<GoogleMapController> _controller = Completer();
-  String _mapStyle;
+  GoogleMapController controller;
   LocationData currentLocation;
   Location location;
-  GoogleMapController controller;
-  Api _api = Api();
-  bool canMakeRequest = true;
-  Timer _timer;
-
+  String _mapStyle;
   CameraPosition initialCameraPosition;
+
+  // Used to place to markers and get which marker has been clicked on
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
   BitmapDescriptor pinLocationIcon;
   Uint8List markerIcon;
+  Uint8List selectedMarkerIcon;
+  MarkerId selectedMarker;
+
+  // Used for the requests to the api
+  // Timer is currently being used to prevent a lot of requests per second, which can lead to the app crashing.
+  Api _api = Api();
+  Timer _timer;
+  bool canMakeRequest = true;
 
   Future<Uint8List> getBytesFromAsset(String path, int width) async {
     ByteData data = await rootBundle.load(path);
@@ -53,6 +57,8 @@ class _MapScreenState extends State<MapScreen> {
 
   getCustomMarker(int size) async {
     markerIcon = await getBytesFromAsset('assets/plane.png', size);
+    selectedMarkerIcon =
+        await getBytesFromAsset('assets/planeSelected.png', size);
   }
 
   @override
@@ -79,8 +85,20 @@ class _MapScreenState extends State<MapScreen> {
     );
 
     controller = await _controller.future;
-
     controller.animateCamera(CameraUpdate.newCameraPosition(cPosition));
+  }
+
+  updateMarker(MarkerId markerId) {
+    Marker marker = markers[markerId];
+    final newMarker = Marker(
+        markerId: markerId,
+        icon: BitmapDescriptor.fromBytes(selectedMarkerIcon),
+        position: marker.position,
+        rotation: marker.rotation,
+        onTap: marker.onTap);
+    setState(() {
+      markers[markerId] = newMarker;
+    });
   }
 
   void updateAircrafts() {
@@ -100,13 +118,18 @@ class _MapScreenState extends State<MapScreen> {
           aircrafts.forEach((aircraft) {
             if (aircraft.position != null && aircraft.onGround == false) {
               final markerId = MarkerId(aircraft.icao24);
+              Uint8List icon;
+              icon =
+                  markerId == selectedMarker ? selectedMarkerIcon : markerIcon;
               final marker = Marker(
                   markerId: markerId,
                   position: LatLng(aircraft.position[0], aircraft.position[1]),
-                  icon: BitmapDescriptor.fromBytes(markerIcon),
+                  icon: BitmapDescriptor.fromBytes(icon),
                   rotation:
                       aircraft.heading != null ? (aircraft.heading - 90) : null,
                   onTap: () {
+                    selectedMarker = markerId;
+                    // updateMarker(markerId);
                     _api.getPositionalData(markerId.value).then((aircraft) {
                       if (aircraft != null) {
                         showModalBottomSheet(
@@ -118,7 +141,9 @@ class _MapScreenState extends State<MapScreen> {
                             ),
                             builder: (context) {
                               return CustomBottomSheet(aircraft);
-                            }).whenComplete(() {});
+                            }).whenComplete(() {
+                            selectedMarker = MarkerId('1');
+                        });
                       }
                     }).catchError((e) {
                       Fluttertoast.showToast(
@@ -139,10 +164,6 @@ class _MapScreenState extends State<MapScreen> {
         });
       }
     });
-  }
-
-  void onMarkerTap(MarkerId id) {
-    print(id.value);
   }
 
   @override
@@ -168,13 +189,19 @@ class _MapScreenState extends State<MapScreen> {
               // cameraPosition will have zoom, tilt, target(LatLng) and bearing
               updateAircrafts();
               if (cameraPosition.zoom > 10) {
-                getCustomMarker(150);
+                getCustomMarker(125);
               }
-              if (cameraPosition.zoom < 10 && cameraPosition.zoom > 6) {
+              if (cameraPosition.zoom < 10 && cameraPosition.zoom > 8) {
                 getCustomMarker(100);
               }
-              if (cameraPosition.zoom < 6) {
+              if (cameraPosition.zoom < 8 && cameraPosition.zoom > 6) {
+                getCustomMarker(75);
+              }
+              if (cameraPosition.zoom < 6 && cameraPosition.zoom > 5) {
                 getCustomMarker(50);
+              }
+              if (cameraPosition.zoom < 5) {
+                getCustomMarker(25);
               }
             },
             markers: Set<Marker>.of(markers.values),
