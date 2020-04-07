@@ -8,27 +8,17 @@ import './customListTile.dart';
 
 class CustomBottomSheet extends StatefulWidget {
   final AircraftState aircraft;
-
-  const CustomBottomSheet(this.aircraft);
+  final FlightInfo info;
+  const CustomBottomSheet(this.aircraft, {this.info});
 
   @override
   _CustomBottomSheetState createState() => _CustomBottomSheetState();
 }
 
 class _CustomBottomSheetState extends State<CustomBottomSheet> {
-  Api _api = Api();
-  FlightInfo info;
-
   @override
   void initState() {
     super.initState();
-    _api.getSpecificFlightInfo(widget.aircraft.icao24).then((res) {
-      if (mounted) {
-        setState(() {
-          info = res;
-        });
-      }
-    });
   }
 
   @override
@@ -57,16 +47,18 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                         fontSize: 18.0,
                         fontWeight: FontWeight.w600),
                   ),
-                   SizedBox(
+                  SizedBox(
                     height: 2.0,
                   ),
-                  info != null && info.number != null ?  Text(
-                    info.number,
-                    style: TextStyle(
-                        color: Colors.black87,
-                        fontSize: 18.0,
-                        fontWeight: FontWeight.w400),
-                  ): SizedBox(),
+                  widget.info != null && widget.info.number != null
+                      ? Text(
+                          widget.info.number,
+                          style: TextStyle(
+                              color: Colors.black87,
+                              fontSize: 18.0,
+                              fontWeight: FontWeight.w400),
+                        )
+                      : SizedBox(),
                   SizedBox(
                     height: 2.0,
                   ),
@@ -89,6 +81,16 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
             color: Colors.white,
             child: ListView(children: <Widget>[
               CustomListTile(LineIcons.tag, widget.aircraft.icao24),
+              widget.info != null
+                  ? Column(
+                      children: <Widget>[
+                        CustomListTile(Icons.flight_takeoff,
+                            widget.info.departureAirport.name),
+                        CustomListTile(
+                            Icons.flight_land, widget.info.arrivalAirport.name)
+                      ],
+                    )
+                  : SizedBox(),
               CustomListTile(
                   LineIcons.globe,
                   (widget.aircraft.position[0].toStringAsFixed(3) +
@@ -105,7 +107,8 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                           knots.toStringAsFixed(2) +
                           ' kt')
                   : Container(),
-              widget.aircraft.verticalRate != null && widget.aircraft.verticalRate != 0
+              widget.aircraft.verticalRate != null &&
+                      widget.aircraft.verticalRate != 0
                   ? CustomListTile(
                       LineIcons.angle_double_up,
                       widget.aircraft.verticalRate.toStringAsFixed(2) +
@@ -113,18 +116,7 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                           vKnots.toStringAsFixed(2) +
                           ' kt')
                   : Container(),
-              info != null
-                  ? Column(
-                      children: <Widget>[
-                        CustomListTile(
-                            Icons.flight_takeoff, info.departureAirport.name),
-                        CustomListTile(
-                            Icons.flight_land, info.arrivalAirport.name),
-                          SizedBox(height: 20.0,)
-                      ],
-                    )
-                  : CustomListTile(
-                      LineIcons.info_circle, 'No additional information found'),
+                  SizedBox(height: 20.0,)
             ]),
           ),
         ),

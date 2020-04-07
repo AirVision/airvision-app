@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:air_vision/camera/camera.dart';
 import 'package:air_vision/components/customBottomSheet.dart';
+import 'package:air_vision/models/flightInfo.dart';
 import 'package:air_vision/services/api.dart';
 import 'package:air_vision/screens/Camera/bndbox.dart';
 import 'package:air_vision/services/orientation_service.dart';
@@ -142,22 +143,23 @@ class _CameraScreenState extends State<CameraScreen> {
               time, position, rotation, fov, aircraftPosition, aircraftSize)
           .then((aircrafts) {
         modalIsOpen = true;
-
-        showModalBottomSheet(
-            context: context,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(20.0),
-                  topLeft: Radius.circular(20)),
-            ),
-            builder: (context) {
-              return CustomBottomSheet(aircrafts.first);
-            }).whenComplete(() {
-          modalIsOpen = false;
+        FlightInfo info;
+        _api.getSpecificFlightInfo(aircrafts.first.icao24).then((res) {
+          info = res;
+          showModalBottomSheet(
+              context: context,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(20.0),
+                    topLeft: Radius.circular(20)),
+              ),
+              builder: (context) {
+                return CustomBottomSheet(aircrafts.first, info: info);
+              }).whenComplete(() {
+            modalIsOpen = false;
+          });
         });
-      }).catchError((onError){
-        
-      });
+      }).catchError((onError) {});
     }
   }
 
@@ -280,7 +282,10 @@ class _CameraScreenState extends State<CameraScreen> {
                                   ),
                                   Text(
                                     infoText,
-                                    style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500, fontSize: 14),
+                                    style: TextStyle(
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 14),
                                   )
                                 ],
                               ),

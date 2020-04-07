@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:air_vision/models/flightInfo.dart';
 import 'package:air_vision/util/math/geodetic_bounds.dart';
 import 'package:air_vision/util/math/geodetic_position.dart';
 import 'package:air_vision/services/api.dart';
@@ -66,7 +67,10 @@ class _MapScreenState extends State<MapScreen> {
     super.initState();
     setUserLocation();
     _timer = Timer.periodic(
-        Duration(seconds: 1), (Timer t) => canMakeRequest = true);
+        Duration(seconds: 1),
+        (Timer t) => {
+              canMakeRequest = true,
+            });
 
     rootBundle.loadString('assets/mapStyle2.txt').then((string) {
       _mapStyle = string;
@@ -86,19 +90,6 @@ class _MapScreenState extends State<MapScreen> {
 
     controller = await _controller.future;
     controller.animateCamera(CameraUpdate.newCameraPosition(cPosition));
-  }
-
-  updateMarker(MarkerId markerId) {
-    Marker marker = markers[markerId];
-    final newMarker = Marker(
-        markerId: markerId,
-        icon: BitmapDescriptor.fromBytes(selectedMarkerIcon),
-        position: marker.position,
-        rotation: marker.rotation,
-        onTap: marker.onTap);
-    setState(() {
-      markers[markerId] = newMarker;
-    });
   }
 
   void updateAircrafts() {
@@ -129,20 +120,25 @@ class _MapScreenState extends State<MapScreen> {
                       aircraft.heading != null ? (aircraft.heading - 90) : null,
                   onTap: () {
                     selectedMarker = markerId;
-                    // updateMarker(markerId);
+                    updateAircrafts();
                     _api.getPositionalData(markerId.value).then((aircraft) {
                       if (aircraft != null) {
-                        showModalBottomSheet(
-                            context: context,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.only(
-                                  topRight: Radius.circular(20.0),
-                                  topLeft: Radius.circular(20)),
-                            ),
-                            builder: (context) {
-                              return CustomBottomSheet(aircraft);
-                            }).whenComplete(() {
+                        FlightInfo info;
+                        _api.getSpecificFlightInfo(markerId.value).then((res) {
+                          info = res;
+                          showModalBottomSheet(
+                              context: context,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.only(
+                                    topRight: Radius.circular(20.0),
+                                    topLeft: Radius.circular(20)),
+                              ),
+                              builder: (context) {
+                                return CustomBottomSheet(aircraft, info: info);
+                              }).whenComplete(() {
                             selectedMarker = MarkerId('1');
+                            updateAircrafts();
+                          });
                         });
                       }
                     }).catchError((e) {
