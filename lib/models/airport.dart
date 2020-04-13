@@ -13,7 +13,7 @@ class Airport{
 
     factory Airport.fromJson(dynamic json) {
     return Airport(
-      json['icao24'] as String,
+      json['icao'] as String,
       json['iata'] as String,
       json['name'] as String,
       json['city'] as String,

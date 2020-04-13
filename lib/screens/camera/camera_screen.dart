@@ -1,11 +1,9 @@
 import 'dart:async';
-import 'dart:convert';
-
 import 'package:air_vision/camera/camera.dart';
 import 'package:air_vision/components/customBottomSheet.dart';
 import 'package:air_vision/models/flightInfo.dart';
 import 'package:air_vision/services/api.dart';
-import 'package:air_vision/screens/Camera/bndbox.dart';
+import 'package:air_vision/screens/Camera/drawbox.dart';
 import 'package:air_vision/services/orientation_service.dart';
 import 'package:air_vision/util/date_time.dart';
 import 'package:camera/camera.dart';
@@ -111,7 +109,7 @@ class _CameraScreenState extends State<CameraScreen> {
               imageWidth: img.width,
               imageMean: 0,
               imageStd: 255.0,
-              numResultsPerClass: 1,
+              numResultsPerClass: 2,
               threshold: 0.2,
             ).then((recognitions) {
               updateRecognitions(recognitions, img.height, img.width);
@@ -236,7 +234,7 @@ class _CameraScreenState extends State<CameraScreen> {
                             : screenW,
                         child: CameraPreview(controller),
                       ),
-                      BndBox(
+                      DrawBox(
                           _recognitions == null ? [] : _recognitions,
                           math.max(_imageHeight, _imageWidth),
                           math.min(_imageHeight, _imageWidth),

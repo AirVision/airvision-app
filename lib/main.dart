@@ -1,6 +1,6 @@
 import 'package:air_vision/screens/camera/camera_screen.dart';
 import 'package:air_vision/screens/debug_screen.dart';
-import 'package:air_vision/screens/map_screen.dart';
+import 'package:air_vision/screens/map/map_screen.dart';
 import 'package:air_vision/screens/profile_screen.dart';
 import 'package:bottom_navy_bar/bottom_navy_bar.dart';
 import 'package:flutter/material.dart';

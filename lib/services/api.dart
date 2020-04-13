@@ -132,6 +132,7 @@ class Api {
     );
 
     if (responseData.statusCode == 200) {
+
       return responseData.body;
     } else {
       return jsonDecode(responseData.body)['error']['message'];
@@ -152,10 +153,36 @@ class Api {
     );
 
     if (responseData.statusCode == 200) {
-      var tagObjsJson = jsonDecode(responseData.body)["data"];
-      FlightInfo flight = FlightInfo.fromJson(tagObjsJson);
-
-      return flight;
+        var tagObjsJson = await jsonDecode(responseData.body)["data"];
+        print(tagObjsJson);
+        FlightInfo flight = FlightInfo.fromJson(tagObjsJson);
+        return flight;
     }
   }
+
+Future<bool> testConnection() async {
+    Map<String, String> headers = {'Content-Type': 'application/json'};
+
+    String body = '''{
+       "bounds": {
+        "min": 0,
+        "max": 0
+        }
+      }
+      ''';
+
+    http.Response responseData = await http.post(
+      baseURL + '/api/v1/aircraft/state/all',
+      body: body,
+      headers: headers,
+    );
+
+    if (responseData.statusCode == 200) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  
 }
+
