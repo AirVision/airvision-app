@@ -13,4 +13,6 @@ class GeodeticPosition {
     }
     return "[$latitude, $longitude, $altitude]";
   }
+
+  factory GeodeticPosition.zero() => GeodeticPosition(latitude: 0.0, longitude: 0.0);
 }

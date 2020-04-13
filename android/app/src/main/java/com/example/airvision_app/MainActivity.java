@@ -74,9 +74,14 @@ public class MainActivity extends FlutterActivity implements SensorEventListener
             // TODO: What to do if there are multiple focal lengths?
             final float focalLength = focalLengths[0];
 
+            // Short edge of the screen
+            final double x = Math.min(sensorSize.getHeight(), sensorSize.getWidth());
+            // Longest edge of the screen
+            final double y = Math.max(sensorSize.getHeight(), sensorSize.getWidth());
+
             final double[] fov = new double[2];
-            fov[0] = Math.toDegrees(2 * Math.atan(sensorSize.getHeight() / (2 * focalLength)));
-            fov[1] = Math.toDegrees(2 * Math.atan(sensorSize.getWidth() / (2 * focalLength)));
+            fov[0] = Math.toDegrees(2 * Math.atan(x / (2 * focalLength)));
+            fov[1] = Math.toDegrees(2 * Math.atan(y / (2 * focalLength)));
 
             result.success(fov);
         } catch (CameraAccessException e) {

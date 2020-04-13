@@ -1,16 +1,18 @@
 import 'dart:convert';
 import 'package:air_vision/models/flightInfo.dart';
-import 'package:air_vision/util/math/geodetic_bounds.dart';
 import 'package:air_vision/models/aircraftState.dart';
+import 'package:air_vision/util/math/geodetic_bounds.dart';
+import 'package:air_vision/util/math/geodetic_position.dart';
 import 'package:http/http.dart' as http;
 import 'package:vector_math/vector_math.dart';
 
 String baseURL = 'https://airvision.seppevolkaerts.be';
 
 class Api {
+
   Future<List<AircraftState>> getVisibleAircraft(
       int time,
-      List position,
+      GeodeticPosition position,
       Quaternion rotation,
       Vector2 fov,
       List aircraftPosition,
