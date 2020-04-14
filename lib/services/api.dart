@@ -38,8 +38,6 @@ class Api {
       }]
     }''';
 
-    print(body);
-
     http.Response responseData = await http.post(
       baseURL + '/api/v1/aircraft/state/visible',
       body: body,
@@ -54,7 +52,7 @@ class Api {
 
       return aircrafts;
     } else {
-      return jsonDecode(responseData.body)['error']['message'];
+      return Future.error(jsonDecode(responseData.body)['error']['message']);
     }
   }
 

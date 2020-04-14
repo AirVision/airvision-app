@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:air_vision/camera/camera.dart';
 import 'package:air_vision/components/customBottomSheet.dart';
+import 'package:air_vision/models/aircraftState.dart';
 import 'package:air_vision/models/flightInfo.dart';
 import 'package:air_vision/services/api.dart';
 import 'package:air_vision/screens/Camera/drawbox.dart';
@@ -52,6 +53,8 @@ class _CameraScreenState extends State<CameraScreen> {
   String infoText = "Searching...";
 
   bool gotCameraPermission = false;
+  List<AircraftState> scannedAircrafts = [];
+  FlightInfo scannedFlightInfo;
 
   _listenLocation() async {
     _locationSubscription = location.onLocationChanged().handleError((err) {
@@ -76,7 +79,8 @@ class _CameraScreenState extends State<CameraScreen> {
 
   void getCameras() async {
     cameras = await availableCameras();
-    controller = CameraController(cameras[0], ResolutionPreset.ultraHigh, enableAudio: false);
+    controller = CameraController(cameras[0], ResolutionPreset.ultraHigh,
+        enableAudio: false);
 
     controller.initialize().then((_) {
       if (!mounted && !gotCameraPermission) {
@@ -109,7 +113,7 @@ class _CameraScreenState extends State<CameraScreen> {
               imageWidth: img.width,
               imageMean: 0,
               imageStd: 255.0,
-              numResultsPerClass: 2,
+              numResultsPerClass: 1,
               threshold: 0.2,
             ).then((recognitions) {
               updateRecognitions(recognitions, img.height, img.width);
@@ -119,6 +123,17 @@ class _CameraScreenState extends State<CameraScreen> {
         });
       }
     });
+  }
+
+  Future<void> getScannedAircrafts(
+      time, _position, rotation, fov, aircraftPosition, aircraftSize) async {
+    scannedAircrafts = await _api.getVisibleAircraft(
+        time, _position, rotation, fov, aircraftPosition, aircraftSize);
+  }
+
+  Future<void> getFlightInformation() async {
+    scannedFlightInfo =
+        await _api.getSpecificFlightInfo(scannedAircrafts.first.icao24);
   }
 
   scanAirplane(previewH, previewW, screenH, screenW) async {
@@ -135,28 +150,27 @@ class _CameraScreenState extends State<CameraScreen> {
       var aircraftPosition = [_x + (_w / 2), _y + (_h / 2)];
       var aircraftSize = [_w, _h];
 
-      _api
-          .getVisibleAircraft(
+      await getScannedAircrafts(
               time, _position, rotation, fov, aircraftPosition, aircraftSize)
-          .then((aircrafts) {
-        modalIsOpen = true;
-        FlightInfo info;
-        _api.getSpecificFlightInfo(aircrafts.first.icao24).then((res) {
-          info = res;
-          showModalBottomSheet(
-              context: context,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.only(
-                    topRight: Radius.circular(20.0),
-                    topLeft: Radius.circular(20)),
-              ),
-              builder: (context) {
-                return CustomBottomSheet(aircrafts.first, info: info);
-              }).whenComplete(() {
-            modalIsOpen = false;
-          });
-        });
-      }).catchError((onError) {});
+          .catchError((e) {});
+      if (scannedAircrafts.length > 0)
+        await getFlightInformation().catchError((e) {});
+
+      modalIsOpen = true;
+      showModalBottomSheet(
+          context: context,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+                topRight: Radius.circular(20.0), topLeft: Radius.circular(20)),
+          ),
+          builder: (context) {
+            return CustomBottomSheet(
+                aircraft:
+                    scannedAircrafts.length > 0 ? scannedAircrafts.first : null,
+                info: scannedFlightInfo);
+          }).whenComplete(() {
+        modalIsOpen = false;
+      });
     }
   }
 

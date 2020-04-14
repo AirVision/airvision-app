@@ -12,7 +12,7 @@ import './customListTile.dart';
 class CustomBottomSheet extends StatefulWidget {
   final AircraftState aircraft;
   final FlightInfo info;
-  const CustomBottomSheet(this.aircraft, {this.info});
+  const CustomBottomSheet({this.aircraft, this.info});
 
   @override
   _CustomBottomSheetState createState() => _CustomBottomSheetState();
@@ -20,7 +20,7 @@ class CustomBottomSheet extends StatefulWidget {
 
 class _CustomBottomSheetState extends State<CustomBottomSheet> {
   Timer _timer;
-  int _timerValue = 3;
+  int _timerValue = 1;
   bool nothingFound = false;
 
   @override

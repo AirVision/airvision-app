@@ -144,6 +144,8 @@ class _MapScreenState extends State<MapScreen> {
     _polyline.add(Polyline(
       polylineId: PolylineId(currentLocation.toString()),
       visible: true,
+      width: 3,
+      patterns: <PatternItem>[PatternItem.dash(20), PatternItem.gap(15)],
       points: waypoints,
       color: Theme.of(context).primaryColor,
     ));
@@ -169,7 +171,7 @@ class _MapScreenState extends State<MapScreen> {
                 topRight: Radius.circular(20.0), topLeft: Radius.circular(20)),
           ),
           builder: (context) {
-            return CustomBottomSheet(selectedAircraft,
+            return CustomBottomSheet(aircraft: selectedAircraft,
                 info: selectedFlightInfo);
           }).whenComplete(() {
         modalIsOpen = false;
@@ -180,6 +182,7 @@ class _MapScreenState extends State<MapScreen> {
   Future<void> updateAircrafts() async {
     // Gets visible region of the mapcamera
     controller.getVisibleRegion().then((LatLngBounds boundary) {
+      // Clear markers to prevent duplicates
       markers.removeWhere(
           (id, marker) => boundary.contains(marker.position) == false && selectedMarker != id);
 
@@ -191,9 +194,6 @@ class _MapScreenState extends State<MapScreen> {
           max: GeodeticPosition(
               latitude: boundary.northeast.latitude,
               longitude: boundary.northeast.longitude));
-
-      // // Clear markers to prevent duplicates
-      // markers.clear();
 
       // Get all aircrafts currently within the latlng bounds of the mapcamera
       _api.getAll(bounds: bounds).then((aircrafts) {
