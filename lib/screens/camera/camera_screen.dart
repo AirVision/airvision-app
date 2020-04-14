@@ -6,6 +6,7 @@ import 'package:air_vision/services/api.dart';
 import 'package:air_vision/screens/Camera/drawbox.dart';
 import 'package:air_vision/services/orientation_service.dart';
 import 'package:air_vision/util/date_time.dart';
+import 'package:air_vision/util/math/geodetic_position.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
@@ -29,10 +30,8 @@ class _CameraScreenState extends State<CameraScreen> {
   String _model = 'Tiny YOLOv2';
 
   StreamSubscription<LocationData> _locationSubscription;
-  LocationData _location;
   final Location location = Location();
-  double lat = -0;
-  double lon = -0;
+  GeodeticPosition _position = GeodeticPosition.zero();
 
   Api _api = Api();
 
@@ -57,12 +56,13 @@ class _CameraScreenState extends State<CameraScreen> {
   _listenLocation() async {
     _locationSubscription = location.onLocationChanged().handleError((err) {
       setState(() {});
-      _locationSubscription.cancel();
-    }).listen((LocationData currentLocation) {
+    }).listen((LocationData locationData) {
       setState(() {
-        _location = currentLocation;
-        lat = _location.latitude;
-        lon = _location.longitude;
+        print("Altitude: " + locationData.altitude.toString());
+        _position = GeodeticPosition(
+            latitude: locationData.latitude,
+            longitude: locationData.longitude,
+            altitude: locationData.altitude);
       });
     });
   }
@@ -76,7 +76,7 @@ class _CameraScreenState extends State<CameraScreen> {
 
   void getCameras() async {
     cameras = await availableCameras();
-    controller = CameraController(cameras[0], ResolutionPreset.ultraHigh);
+    controller = CameraController(cameras[0], ResolutionPreset.ultraHigh, enableAudio: false);
 
     controller.initialize().then((_) {
       if (!mounted && !gotCameraPermission) {
@@ -124,7 +124,6 @@ class _CameraScreenState extends State<CameraScreen> {
   scanAirplane(previewH, previewW, screenH, screenW) async {
     if (!modalIsOpen) {
       var time = DateTime.now().secondsSinceEpoch;
-      var position = [lat, lon];
       var fov = await cameras[0].getFov();
       var rotation = await _orientationService.getQuaternion();
 
@@ -138,7 +137,7 @@ class _CameraScreenState extends State<CameraScreen> {
 
       _api
           .getVisibleAircraft(
-              time, position, rotation, fov, aircraftPosition, aircraftSize)
+              time, _position, rotation, fov, aircraftPosition, aircraftSize)
           .then((aircrafts) {
         modalIsOpen = true;
         FlightInfo info;

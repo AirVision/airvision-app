@@ -23,6 +23,7 @@ class _DebugScreenState extends State<DebugScreen> {
 
   double lat = -0;
   double lon = -0;
+  double alt = -0;
   Timer _timer;
   String _timeString;
   Api _api = Api();
@@ -56,6 +57,7 @@ class _DebugScreenState extends State<DebugScreen> {
           _location = currentLocation;
           lat = _location.latitude;
           lon = _location.longitude;
+          alt = _location.altitude;
         });
       }
     });
@@ -165,11 +167,15 @@ class _DebugScreenState extends State<DebugScreen> {
                               SizedBox(
                                 width: 20.0,
                               ),
-                              Text('Latitude: ${lat.toStringAsFixed(2)}'),
+                              Text('Lat: ${lat.toStringAsFixed(2)}'),
                               SizedBox(
                                 width: 20.0,
                               ),
-                              Text('Longitude: ${lon.toStringAsFixed(2)}'),
+                              Text('Lon: ${lon.toStringAsFixed(2)}'),
+                              SizedBox(
+                                width: 20.0,
+                              ),
+                              Text('Alt: ${alt.toStringAsFixed(2)}'),
                             ],
                           ),
                         ),
