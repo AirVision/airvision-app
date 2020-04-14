@@ -78,7 +78,6 @@ class _MapScreenState extends State<MapScreen> {
       oneMiliSec,
       (Timer timer) => setState(
         () {
-          print("TIMER");
           if (_timerValue < 100) {
             updateAircrafts();
             _timerisActive = false;
@@ -111,6 +110,12 @@ class _MapScreenState extends State<MapScreen> {
     if (zoom < 5) {
       markerIcon = await getCustomMarkerIcon(25);
       selectedMarkerIcon = await getCustomSelectedMarkerIcon(25);
+    }
+
+    if(currentZoomlevel - zoom >= 1 || zoom - currentZoomlevel >=1){
+      markers.clear();
+      print(zoom.toString() + " " + currentZoomlevel.toString());
+      currentZoomlevel = zoom;
     }
   }
 
@@ -177,7 +182,8 @@ class _MapScreenState extends State<MapScreen> {
   Future<void> updateAircrafts() async {
     // Gets visible region of the mapcamera
     controller.getVisibleRegion().then((LatLngBounds boundary) {
-      markers.removeWhere((id, marker) => boundary.contains(marker.position) == false);
+      markers.removeWhere(
+          (id, marker) => boundary.contains(marker.position) == false);
 
       // set min and max bounds
       var bounds = GeodeticBounds(
@@ -206,8 +212,8 @@ class _MapScreenState extends State<MapScreen> {
                 markerId: markerId,
                 position: LatLng(aircraft.position[0], aircraft.position[1]),
                 icon: BitmapDescriptor.fromBytes(icon),
-                anchor: Offset(0, 0),
-                rotation: aircraft.heading != null ? (aircraft.heading) : null,
+                anchor: Offset(0, .5),
+                rotation: aircraft.heading != null ? (aircraft.heading - 90) : null,
                 onTap: () async {
                   selectedAircraft = null;
                   selectedFlightInfo = null;
@@ -217,7 +223,7 @@ class _MapScreenState extends State<MapScreen> {
                   await updateAircrafts().catchError((e) {});
                   await getAircraftState().catchError((e) {});
                   await getFlightInformation().catchError((e) {});
-                  // if (selectedFlightInfo != null) updateWaypoints();
+                  if (selectedFlightInfo != null) updateWaypoints();
                   openInformationModal();
                 });
             setState(() {
@@ -249,7 +255,9 @@ class _MapScreenState extends State<MapScreen> {
               } else {
                 startTimer();
               }
-              updateMakerSize(cameraPosition.zoom);
+
+                updateMakerSize(cameraPosition.zoom);
+              currentZoomlevel = cameraPosition.zoom;
             },
             markers: Set<Marker>.of(markers.values),
             buildingsEnabled: true,

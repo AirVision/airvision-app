@@ -7,6 +7,6 @@ class Waypoint {
   Waypoint(this.time, this.pos);
 
   factory Waypoint.fromJson(dynamic json) {
-    return Waypoint(json['time'] as int, json['waypoints'] as List);
+    return Waypoint(json['time'] as int, json['pos'] as List);
   }
 }
