@@ -34,6 +34,7 @@ class _MapScreenState extends State<MapScreen> {
   String _mapStyle;
   CameraPosition initialCameraPosition;
   Set<Polyline> _polyline = {};
+  double currentZoomlevel = 10;
 
   // Used to place to markers and get which marker has been clicked on
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
@@ -175,18 +176,20 @@ class _MapScreenState extends State<MapScreen> {
 
   Future<void> updateAircrafts() async {
     // Gets visible region of the mapcamera
-    controller.getVisibleRegion().then((LatLngBounds res) {
+    controller.getVisibleRegion().then((LatLngBounds boundary) {
+      markers.removeWhere((id, marker) => boundary.contains(marker.position) == false);
+
       // set min and max bounds
       var bounds = GeodeticBounds(
           min: GeodeticPosition(
-              latitude: res.southwest.latitude,
-              longitude: res.southwest.longitude),
+              latitude: boundary.southwest.latitude,
+              longitude: boundary.southwest.longitude),
           max: GeodeticPosition(
-              latitude: res.northeast.latitude,
-              longitude: res.northeast.longitude));
+              latitude: boundary.northeast.latitude,
+              longitude: boundary.northeast.longitude));
 
-      // Clear markers to prevent duplicates
-      markers.clear();
+      // // Clear markers to prevent duplicates
+      // markers.clear();
 
       // Get all aircrafts currently within the latlng bounds of the mapcamera
       _api.getAll(bounds: bounds).then((aircrafts) {
@@ -211,7 +214,7 @@ class _MapScreenState extends State<MapScreen> {
                   if (selectedMarker != markerId) _polyline.clear();
                   selectedMarker = markerId;
 
-                  await updateAircrafts();
+                  await updateAircrafts().catchError((e) {});
                   await getAircraftState().catchError((e) {});
                   await getFlightInformation().catchError((e) {});
                   // if (selectedFlightInfo != null) updateWaypoints();
