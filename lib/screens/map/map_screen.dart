@@ -72,7 +72,7 @@ class _MapScreenState extends State<MapScreen> {
 
   void startTimer() {
     _timerisActive = true;
-    double _timerValue = 500;
+    double _timerValue = 300;
     const oneMiliSec = const Duration(milliseconds: 100);
     _timer = new Timer.periodic(
       oneMiliSec,
@@ -105,14 +105,12 @@ class _MapScreenState extends State<MapScreen> {
     }
     if (zoom < 6 && zoom > 5) {
       markerIcon = await getCustomMarkerIcon(50);
-      selectedMarkerIcon = await getCustomSelectedMarkerIcon(50);
     }
     if (zoom < 5) {
       markerIcon = await getCustomMarkerIcon(25);
-      selectedMarkerIcon = await getCustomSelectedMarkerIcon(25);
     }
 
-    if(currentZoomlevel - zoom >= 1 || zoom - currentZoomlevel >=1){
+    if(currentZoomlevel - zoom >= 1 ||currentZoomlevel - zoom >=1){
       markers.clear();
       print(zoom.toString() + " " + currentZoomlevel.toString());
       currentZoomlevel = zoom;
@@ -183,7 +181,7 @@ class _MapScreenState extends State<MapScreen> {
     // Gets visible region of the mapcamera
     controller.getVisibleRegion().then((LatLngBounds boundary) {
       markers.removeWhere(
-          (id, marker) => boundary.contains(marker.position) == false);
+          (id, marker) => boundary.contains(marker.position) == false && selectedMarker != id);
 
       // set min and max bounds
       var bounds = GeodeticBounds(
