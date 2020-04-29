@@ -1,5 +1,3 @@
-import 'package:air_vision/util/math/geodetic_position.dart';
-
 class Waypoint {
   int time;
   List pos;

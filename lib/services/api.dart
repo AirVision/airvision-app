@@ -9,7 +9,6 @@ import 'package:vector_math/vector_math.dart';
 String baseURL = 'https://airvision.seppevolkaerts.be';
 
 class Api {
-
   Future<List<AircraftState>> getVisibleAircraft(
       int time,
       GeodeticPosition position,
@@ -132,7 +131,6 @@ class Api {
     );
 
     if (responseData.statusCode == 200) {
-
       return responseData.body;
     } else {
       return jsonDecode(responseData.body)['error']['message'];
@@ -153,14 +151,16 @@ class Api {
     );
 
     if (responseData.statusCode == 200) {
-        var tagObjsJson = await jsonDecode(responseData.body)["data"];
-        print(tagObjsJson);
-        FlightInfo flight = FlightInfo.fromJson(tagObjsJson);
-        return flight;
+      var tagObjsJson = await jsonDecode(responseData.body)["data"];
+      print(tagObjsJson);
+      FlightInfo flight = FlightInfo.fromJson(tagObjsJson);
+      return flight;
+    } else {
+      return jsonDecode(responseData.body)['error']['message'];
     }
   }
 
-Future<bool> testConnection() async {
+  Future<bool> testConnection() async {
     Map<String, String> headers = {'Content-Type': 'application/json'};
 
     String body = '''{
@@ -183,6 +183,4 @@ Future<bool> testConnection() async {
       return false;
     }
   }
-  
 }
-

@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:air_vision/camera/camera.dart';
+import 'package:air_vision/util/camera/camera.dart';
 import 'package:air_vision/components/customBottomSheet.dart';
 import 'package:air_vision/models/aircraftState.dart';
 import 'package:air_vision/models/flightInfo.dart';
@@ -22,39 +22,51 @@ class CameraScreen extends StatefulWidget {
 }
 
 class _CameraScreenState extends State<CameraScreen> {
-  OrientationService _orientationService = OrientationService();
-
-  List<CameraDescription> cameras;
-  List<dynamic> _recognitions;
-  int _imageHeight = 0;
-  int _imageWidth = 0;
-  String _model = 'Tiny YOLOv2';
-
-  StreamSubscription<LocationData> _locationSubscription;
   final Location location = Location();
   GeodeticPosition _position = GeodeticPosition.zero();
 
-  Api _api = Api();
+  OrientationService _orientationService = OrientationService();
+  List<dynamic> _recognitions;
+  StreamSubscription<LocationData> _locationSubscription;
 
+  Api _api = Api();
+  List<CameraDescription> cameras;
   CameraController controller;
   double previewH = 0.0;
   double previewW = 0.0;
   double screenRatio = 0.0;
   double previewRatio = 0.0;
+  int _imageHeight = 0;
+  int _imageWidth = 0;
   Size screen;
-
   double screenH = 0.0;
   double screenW = 0.0;
-
   double scale = 1.0;
   bool isDetecting = false;
   bool modalIsOpen = false;
   bool detectedAircraft = false;
   String infoText = "Searching...";
-
   bool gotCameraPermission = false;
   List<AircraftState> scannedAircrafts = [];
   FlightInfo scannedFlightInfo;
+
+  @override
+  void initState() {
+    super.initState();
+    checkCameraPermission();
+    _orientationService.start();
+    loadModel();
+    getCameras();
+    _listenLocation();
+  }
+
+  @override
+  void dispose() {
+    _orientationService.stop();
+    controller?.dispose();
+    _locationSubscription.cancel();
+    super.dispose();
+  }
 
   _listenLocation() async {
     _locationSubscription = location.onLocationChanged().handleError((err) {
@@ -86,7 +98,6 @@ class _CameraScreenState extends State<CameraScreen> {
       if (!mounted && !gotCameraPermission) {
         return;
       }
-
       screen = MediaQuery.of(context).size;
       var tmp = MediaQuery.of(context).size;
       screenH = math.max(tmp.height, tmp.width);
@@ -98,30 +109,22 @@ class _CameraScreenState extends State<CameraScreen> {
       screenRatio = screenH / screenW;
       previewRatio = previewH / previewW;
 
-      setState(() {});
-
-      if (mounted) {
-        controller.startImageStream((CameraImage img) {
-          if (!isDetecting) {
-            isDetecting = true;
-            Tflite.detectObjectOnFrame(
-              bytesList: img.planes.map((plane) {
-                return plane.bytes;
-              }).toList(),
-              model: _model,
-              imageHeight: img.height,
-              imageWidth: img.width,
-              imageMean: 0,
-              imageStd: 255.0,
-              numResultsPerClass: 1,
-              threshold: 0.2,
-            ).then((recognitions) {
-              updateRecognitions(recognitions, img.height, img.width);
-              isDetecting = false;
-            });
-          }
-        });
-      }
+      controller.startImageStream((CameraImage img) {
+          Tflite.detectObjectOnFrame(
+            bytesList: img.planes.map((plane) {
+              return plane.bytes;
+            }).toList(),
+            model: 'Tiny YOLOv2',
+            imageHeight: img.height,
+            imageWidth: img.width,
+            imageMean: 0,
+            imageStd: 255.0,
+            numResultsPerClass: 1,
+            threshold: 0.2,
+          ).then((recognitions) {
+            updateRecognitions(recognitions, img.height, img.width);
+          });
+      });
     });
   }
 
@@ -174,7 +177,7 @@ class _CameraScreenState extends State<CameraScreen> {
     }
   }
 
-  updateRecognitions(List recognitions, h, w) {
+ updateRecognitions(List recognitions, h, w) {
     if (mounted) {
       setState(() {
         _recognitions = recognitions;
@@ -190,24 +193,6 @@ class _CameraScreenState extends State<CameraScreen> {
         }
       });
     }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    checkCameraPermission();
-    _orientationService.start();
-    loadModel();
-    getCameras();
-    _listenLocation();
-  }
-
-  @override
-  void dispose() {
-    _orientationService.stop();
-    controller?.dispose();
-    _locationSubscription.cancel();
-    super.dispose();
   }
 
   Future<void> checkCameraPermission() async {
@@ -238,15 +223,7 @@ class _CameraScreenState extends State<CameraScreen> {
             body: gotCameraPermission
                 ? Stack(
                     children: [
-                      OverflowBox(
-                        maxHeight: screenRatio > previewRatio
-                            ? screenH
-                            : screenW / previewW * previewH,
-                        maxWidth: screenRatio > previewRatio
-                            ? screenH / previewH * previewW
-                            : screenW,
-                        child: CameraPreview(controller),
-                      ),
+                      CameraPreview(controller),
                       DrawBox(
                           _recognitions == null ? [] : _recognitions,
                           math.max(_imageHeight, _imageWidth),

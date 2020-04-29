@@ -1,5 +1,3 @@
-import 'package:air_vision/util/math/geodetic_position.dart';
-
 class Airport{
   Airport(this.icao, this.iata, this.name, this.city,
       this.country, this.position);

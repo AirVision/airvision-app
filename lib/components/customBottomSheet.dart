@@ -1,11 +1,8 @@
 import 'dart:async';
-
 import 'package:air_vision/models/aircraftState.dart';
 import 'package:air_vision/models/flightInfo.dart';
-import 'package:air_vision/services/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:line_icons/line_icons.dart';
 import './customListTile.dart';
 

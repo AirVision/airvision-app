@@ -5,7 +5,6 @@ import 'package:air_vision/screens/profile_screen.dart';
 import 'package:bottom_navy_bar/bottom_navy_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:line_icons/line_icons.dart';
 
 void main() => runApp(AirVision());
 

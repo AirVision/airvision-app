@@ -26,7 +26,6 @@ class _DebugScreenState extends State<DebugScreen> {
   double alt = -0;
   Timer _timer;
   String _timeString;
-  Api _api = Api();
 
   LocationData _location;
   final Location location = Location();
