@@ -152,7 +152,6 @@ class Api {
 
     if (responseData.statusCode == 200) {
       var tagObjsJson = await jsonDecode(responseData.body)["data"];
-      print(tagObjsJson);
       FlightInfo flight = FlightInfo.fromJson(tagObjsJson);
       return flight;
     } else {

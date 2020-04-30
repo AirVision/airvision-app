@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:air_vision/util/math/euler_angles.dart';
-import 'package:air_vision/services/api.dart';
 import 'package:air_vision/services/orientation_service.dart';
 import 'package:air_vision/services/time_service.dart';
 import 'package:air_vision/util/math/quaternion.dart';

@@ -12,10 +12,47 @@ Future<Uint8List> getBytesFromAsset(String path, int width) async {
       .asUint8List();
 }
 
-Future<Uint8List> getCustomMarkerIcon(int size) async {
-  return await getBytesFromAsset('assets/plane.png', size);
+Future<Uint8List> getAirportIcon() async {
+  return await getBytesFromAsset('assets/airport.png', 100);
 }
 
-Future<Uint8List> getCustomSelectedMarkerIcon(int size) async {
-  return await getBytesFromAsset('assets/planeSelected.png', size);
+Future<List<List<Uint8List>>> getNormalMarkerIcon(
+    int normalsize, int selectedSize) async {
+  //UltraLight
+  var ultraLightIcon =
+      await getBytesFromAsset('assets/ultraLight.png', normalsize - 15);
+  var ultraLightSelected =
+      await getBytesFromAsset('assets/ultraLightSelected.png', selectedSize);
+
+  //Light
+  var lightIcon = await getBytesFromAsset('assets/light.png', normalsize - 15);
+  var lightSelected =
+      await getBytesFromAsset('assets/lightSelected.png', selectedSize);
+
+  //Normal
+  var normalIcon =
+      await getBytesFromAsset('assets/normal.png', normalsize - 10);
+  var normalSelected =
+      await getBytesFromAsset('assets/normalSelected.png', selectedSize);
+
+  //Heavy
+  var heavyIcon = await getBytesFromAsset('assets/heavy.png', normalsize);
+  var heavySelected =
+      await getBytesFromAsset('assets/heavySelected.png', selectedSize);
+
+  //VeryHeavy
+  var veryHeavyIcon =
+      await getBytesFromAsset('assets/veryHeavy.png', normalsize);
+  var veryHeavySelected =
+      await getBytesFromAsset('assets/veryHeavySelected.png', selectedSize);
+
+  //Final list
+  List<List<Uint8List>> list = [
+    [ultraLightIcon, ultraLightSelected],
+    [lightIcon, lightSelected],
+    [normalIcon, normalSelected],
+    [heavyIcon, heavySelected],
+    [veryHeavyIcon, veryHeavySelected],
+  ];
+  return list;
 }
