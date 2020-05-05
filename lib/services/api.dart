@@ -48,7 +48,7 @@ class Api {
       List<AircraftState> aircrafts = tagObjsJson
           .map((tagJson) => AircraftState.fromJson(tagJson))
           .toList();
-
+      print(tagObjsJson);
       return aircrafts;
     } else {
       return Future.error(jsonDecode(responseData.body)['error']['message']);

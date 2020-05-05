@@ -20,12 +20,12 @@ Future<List<List<Uint8List>>> getNormalMarkerIcon(
     int normalsize, int selectedSize) async {
   //UltraLight
   var ultraLightIcon =
-      await getBytesFromAsset('assets/ultraLight.png', normalsize - 15);
+      await getBytesFromAsset('assets/ultraLight.png', normalsize - 25);
   var ultraLightSelected =
       await getBytesFromAsset('assets/ultraLightSelected.png', selectedSize);
 
   //Light
-  var lightIcon = await getBytesFromAsset('assets/light.png', normalsize - 15);
+  var lightIcon = await getBytesFromAsset('assets/light.png', normalsize - 25);
   var lightSelected =
       await getBytesFromAsset('assets/lightSelected.png', selectedSize);
 

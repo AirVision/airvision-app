@@ -47,6 +47,7 @@ class _CameraScreenState extends State<CameraScreen> {
   bool detectedAircraft = false;
   String infoText = "Searching...";
   bool gotCameraPermission = false;
+
   List<AircraftState> scannedAircrafts = [];
   FlightInfo scannedFlightInfo;
 
@@ -109,22 +110,30 @@ class _CameraScreenState extends State<CameraScreen> {
       screenRatio = screenH / screenW;
       previewRatio = previewH / previewW;
 
-      controller.startImageStream((CameraImage img) {
-          Tflite.detectObjectOnFrame(
-            bytesList: img.planes.map((plane) {
-              return plane.bytes;
-            }).toList(),
-            model: 'Tiny YOLOv2',
-            imageHeight: img.height,
-            imageWidth: img.width,
-            imageMean: 0,
-            imageStd: 255.0,
-            numResultsPerClass: 1,
-            threshold: 0.2,
-          ).then((recognitions) {
-            updateRecognitions(recognitions, img.height, img.width);
-          });
-      });
+      setState(() {});
+
+      if (mounted) {
+        controller.startImageStream((CameraImage img) {
+          if (!isDetecting) {
+            isDetecting = true;
+            Tflite.detectObjectOnFrame(
+              bytesList: img.planes.map((plane) {
+                return plane.bytes;
+              }).toList(),
+              model: 'Tiny YOLOv2',
+              imageHeight: img.height,
+              imageWidth: img.width,
+              imageMean: 0,
+              imageStd: 255.0,
+              numResultsPerClass: 1,
+              threshold: 0.2,
+            ).then((recognitions) {
+              updateRecognitions(recognitions, img.height, img.width);
+              isDetecting = false;
+            });
+          }
+        });
+      }
     });
   }
 
@@ -141,6 +150,8 @@ class _CameraScreenState extends State<CameraScreen> {
 
   scanAirplane(previewH, previewW, screenH, screenW) async {
     if (!modalIsOpen) {
+      print("SCANNED");
+
       var time = DateTime.now().secondsSinceEpoch;
       var fov = await cameras[0].getFov();
       var rotation = await _orientationService.getQuaternion();
@@ -158,7 +169,6 @@ class _CameraScreenState extends State<CameraScreen> {
           .catchError((e) {});
       if (scannedAircrafts.length > 0)
         await getFlightInformation().catchError((e) {});
-
       modalIsOpen = true;
       showModalBottomSheet(
           context: context,
@@ -168,16 +178,14 @@ class _CameraScreenState extends State<CameraScreen> {
           ),
           builder: (context) {
             return CustomBottomSheet(
-                aircraft:
-                    scannedAircrafts.length > 0 ? scannedAircrafts.first : null,
-                info: scannedFlightInfo);
+                aircraft: scannedAircrafts.length > 0? scannedAircrafts.first : null , info: scannedFlightInfo);
           }).whenComplete(() {
         modalIsOpen = false;
       });
     }
   }
 
- updateRecognitions(List recognitions, h, w) {
+  updateRecognitions(List recognitions, h, w) {
     if (mounted) {
       setState(() {
         _recognitions = recognitions;
