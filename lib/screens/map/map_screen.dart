@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:air_vision/models/aircraftInfo.dart';
 import 'package:air_vision/models/aircraftState.dart';
 import 'package:air_vision/models/flightInfo.dart';
 import 'package:air_vision/screens/map/map_markers.dart';
@@ -56,6 +57,7 @@ class _MapScreenState extends State<MapScreen> {
   //Modal information
   FlightInfo selectedFlightInfo;
   AircraftState selectedAircraft;
+  AircraftInfo aircraftInfo;
 
   @override
   void initState() {
@@ -157,7 +159,6 @@ class _MapScreenState extends State<MapScreen> {
 
     if (selectedFlightInfo.departureAirport != null) {
       List pos = selectedFlightInfo.departureAirport.position;
-      print(pos);
       final marker = Marker(
           markerId: MarkerId("airport"),
           position: LatLng(pos[0], pos[1]),
@@ -177,6 +178,11 @@ class _MapScreenState extends State<MapScreen> {
     selectedAircraft = await _api.getPositionalData(selectedMarker.value);
   }
 
+  // Gets additional aircraft information
+  Future<void> getAircraftInfo() async{
+    aircraftInfo = await _api.getSpecificAircraftInfo(selectedMarker.value);
+  }
+
   void openInformationModal() {
     if (!modalIsOpen) {
       modalIsOpen = true;
@@ -188,7 +194,7 @@ class _MapScreenState extends State<MapScreen> {
           ),
           builder: (context) {
             return CustomBottomSheet(
-                aircraft: selectedAircraft, info: selectedFlightInfo);
+                aircraft: selectedAircraft, flightInfo: selectedFlightInfo,aircraftInfo: aircraftInfo,);
           }).whenComplete(() {
         modalIsOpen = false;
       });
@@ -275,6 +281,7 @@ class _MapScreenState extends State<MapScreen> {
                   await updateAircrafts().catchError((e) {});
                   await getAircraftState().catchError((e) {});
                   await getFlightInformation().catchError((e) {});
+                  await getAircraftInfo().catchError((e)  {});
                   if (selectedFlightInfo != null) updateWaypoints();
                   openInformationModal();
                 });
@@ -346,7 +353,7 @@ class _MapScreenState extends State<MapScreen> {
                                 height: 50,
                                 width: 50,
                                 color: Colors.transparent,
-                                child: SpinKitFadingCube(
+                                child: SpinKitChasingDots(
                                   color: Theme.of(context).primaryColor,
                                   size: 25.0,
                                 ),

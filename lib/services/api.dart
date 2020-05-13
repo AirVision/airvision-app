@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:air_vision/models/aircraftInfo.dart';
 import 'package:air_vision/models/flightInfo.dart';
 import 'package:air_vision/models/aircraftState.dart';
 import 'package:air_vision/util/math/geodetic_bounds.dart';
@@ -48,7 +49,6 @@ class Api {
       List<AircraftState> aircrafts = tagObjsJson
           .map((tagJson) => AircraftState.fromJson(tagJson))
           .toList();
-      print(tagObjsJson);
       return aircrafts;
     } else {
       return Future.error(jsonDecode(responseData.body)['error']['message']);
@@ -117,11 +117,11 @@ class Api {
     }
   }
 
-  Future<dynamic> getSpecificAircraftInfo(String icao24) async {
+  Future<AircraftInfo> getSpecificAircraftInfo(String icao24) async {
     Map<String, String> headers = {'Content-Type': 'application/json'};
 
     String body = '''{
-      "icao24": $icao24,
+      "icao24": "$icao24"
     }''';
 
     http.Response responseData = await http.post(
@@ -131,7 +131,10 @@ class Api {
     );
 
     if (responseData.statusCode == 200) {
-      return responseData.body;
+      var tagObjsJson = jsonDecode(responseData.body)["data"];
+      AircraftInfo flight = AircraftInfo.fromJson(tagObjsJson);
+      print(tagObjsJson);
+      return flight;
     } else {
       return jsonDecode(responseData.body)['error']['message'];
     }

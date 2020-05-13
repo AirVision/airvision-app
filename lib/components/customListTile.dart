@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 class CustomListTile extends StatefulWidget {
   final IconData icon;
   final String text;
+  final String discription;
 
-  const CustomListTile(this.icon, this.text);
+  const CustomListTile(this.icon, this.text, this.discription);
 
   @override
   _CustomListTileState createState() => _CustomListTileState();
@@ -24,7 +25,7 @@ class _CustomListTileState extends State<CustomListTile> {
             decoration: BoxDecoration(
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.15),
+                  color: Color(0xffE9E9E9),
                   blurRadius: 5.0, // has the effect of softening the shadow
                   spreadRadius: 0.0, // has the effect of extending the shadow
                 )
@@ -32,17 +33,39 @@ class _CustomListTileState extends State<CustomListTile> {
               borderRadius: BorderRadius.circular(8),
               color: Colors.white,
             ),
-            child: ListTile(
-              leading: Icon(
-                widget.icon,
-                color: Color(0xff505050),
-              ),
-              title: Text(
-                widget.text,
-                style: TextStyle(
-                  color: Color(0xff505050),
+            child: Stack(
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 20.0),
+                  child: Row(
+                    children: <Widget>[
+                      Icon(
+                        widget.icon,
+                        color: Color(0xff505050),
+                      ),
+                      SizedBox(
+                        width: 20.0,
+                      ),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          widget.text,
+                          style: TextStyle(
+                              color: Color(0xff505050),  fontSize: widget.text.length < 30? 16.0 : 13.0),
+                        ),
+                      )
+                    ],
+                  ),
                 ),
-              ),
+                Positioned(
+                  child: Text(
+                    widget.discription,
+                    style: TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                  top: 7,
+                  right: 10,
+                )
+              ],
             ),
           ),
         ],

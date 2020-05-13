@@ -74,7 +74,6 @@ class _CameraScreenState extends State<CameraScreen> {
       setState(() {});
     }).listen((LocationData locationData) {
       setState(() {
-        print("Altitude: " + locationData.altitude.toString());
         _position = GeodeticPosition(
             latitude: locationData.latitude,
             longitude: locationData.longitude,
@@ -113,7 +112,7 @@ class _CameraScreenState extends State<CameraScreen> {
       setState(() {});
 
       if (mounted) {
-        controller.startImageStream((CameraImage img) {
+        controller.startImageStream((CameraImage img) async{
           if (!isDetecting) {
             isDetecting = true;
             Tflite.detectObjectOnFrame(
@@ -150,8 +149,6 @@ class _CameraScreenState extends State<CameraScreen> {
 
   scanAirplane(previewH, previewW, screenH, screenW) async {
     if (!modalIsOpen) {
-      print("SCANNED");
-
       var time = DateTime.now().secondsSinceEpoch;
       var fov = await cameras[0].getFov();
       var rotation = await _orientationService.getQuaternion();
@@ -167,6 +164,7 @@ class _CameraScreenState extends State<CameraScreen> {
       await getScannedAircrafts(
               time, _position, rotation, fov, aircraftPosition, aircraftSize)
           .catchError((e) {});
+
       if (scannedAircrafts.length > 0)
         await getFlightInformation().catchError((e) {});
       modalIsOpen = true;
@@ -178,7 +176,7 @@ class _CameraScreenState extends State<CameraScreen> {
           ),
           builder: (context) {
             return CustomBottomSheet(
-                aircraft: scannedAircrafts.length > 0? scannedAircrafts.first : null , info: scannedFlightInfo);
+                aircraft: scannedAircrafts.length > 0? scannedAircrafts.first : null , flightInfo: scannedFlightInfo);
           }).whenComplete(() {
         modalIsOpen = false;
       });

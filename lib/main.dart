@@ -1,12 +1,15 @@
 import 'package:air_vision/screens/camera/camera_screen.dart';
 import 'package:air_vision/screens/debug_screen.dart';
 import 'package:air_vision/screens/map/map_screen.dart';
-import 'package:air_vision/screens/profile_screen.dart';
+import 'package:air_vision/screens/settings_screen.dart';
 import 'package:bottom_navy_bar/bottom_navy_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-void main() => runApp(AirVision());
+void main() {
+
+    runApp(AirVision());
+}
 
 class AirVision extends StatelessWidget {
   @override
@@ -48,7 +51,7 @@ class _MyHomePageState extends State<MyHomePage> {
         children: <Widget>[
           MapScreen(),
           CameraScreen(),
-          ProfileScreen(),
+          SettingsScreen(),
           DebugScreen()
         ],
       ),
@@ -78,9 +81,9 @@ class _MyHomePageState extends State<MyHomePage> {
               textAlign: TextAlign.center,
               inactiveColor: Color(0xff1B2531)),
           BottomNavyBarItem(
-              icon: Icon(Icons.person),
+              icon: Icon(Icons.settings),
               title: Text(
-                'Profile',
+                'Settings',
               ),
               activeColor: Colors.lightBlue,
               textAlign: TextAlign.center,
