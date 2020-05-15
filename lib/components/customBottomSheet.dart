@@ -23,7 +23,7 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
   Timer _timer;
   int _timerValue = 1;
   bool nothingFound = false;
-  List<String> speedSystems = ['M/s', 'Km/h', 'Knots'];
+  List<String> speedSystems = ['m/s', 'km/h', 'knots'];
   int indexSpeedSystem = 0;
 
   @override
@@ -72,13 +72,13 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
     String verticalVelocity = '';
     if (widget.aircraft != null && widget.aircraft.velocity != null) {
       switch (speedSystems[indexSpeedSystem]) {
-        case 'M/s':
+        case 'm/s':
           velocity = widget.aircraft.velocity.toStringAsFixed(2) + ' m/s';
           if (widget.aircraft.verticalRate != null)
             verticalVelocity =
                 widget.aircraft.verticalRate.toStringAsFixed(2) + ' m/s';
           break;
-        case 'Km/h':
+        case 'km/h':
           velocity =
               (widget.aircraft.velocity * 3.6).toStringAsFixed(2) + ' km/h';
           if (widget.aircraft.verticalRate != null)
@@ -86,7 +86,7 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                 (widget.aircraft.verticalRate * 3.6).toStringAsFixed(2) +
                     ' km/h';
           break;
-        case 'Knots':
+        case 'knots':
           velocity =
               (widget.aircraft.velocity * 1.94384).toStringAsFixed(2) + ' kt';
           if (widget.aircraft.verticalRate != null)

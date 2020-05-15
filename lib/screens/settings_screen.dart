@@ -13,7 +13,7 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   bool locationGranted = false;
   bool cameraGranted = false;
-  List<String> speedSystems = ['M/s', 'Km/h', 'Knots'];
+  List<String> speedSystems = ['m/s', 'km/h', 'knots'];
   int selectedSpeedSystem;
 
   @override
