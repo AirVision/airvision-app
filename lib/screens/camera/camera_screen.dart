@@ -112,7 +112,7 @@ class _CameraScreenState extends State<CameraScreen> {
       setState(() {});
 
       if (mounted) {
-        controller.startImageStream((CameraImage img) async{
+        controller.startImageStream((CameraImage img) async {
           if (!isDetecting) {
             isDetecting = true;
             Tflite.detectObjectOnFrame(
@@ -149,9 +149,10 @@ class _CameraScreenState extends State<CameraScreen> {
 
   scanAirplane(previewH, previewW, screenH, screenW) async {
     if (!modalIsOpen) {
+      modalIsOpen = true;
       var time = DateTime.now().secondsSinceEpoch;
       var fov = await cameras[0].getFov();
-      var rotation = await _orientationService.getQuaternion();
+      var _rotation = await _orientationService.getQuaternion();
 
       var _x = _recognitions[0]["rect"]["x"];
       var _w = _recognitions[0]["rect"]["w"];
@@ -162,12 +163,12 @@ class _CameraScreenState extends State<CameraScreen> {
       var aircraftSize = [_w, _h];
 
       await getScannedAircrafts(
-              time, _position, rotation, fov, aircraftPosition, aircraftSize)
+              time, _position, _rotation, fov, aircraftPosition, aircraftSize)
           .catchError((e) {});
 
       if (scannedAircrafts.length > 0)
         await getFlightInformation().catchError((e) {});
-      modalIsOpen = true;
+
       showModalBottomSheet(
           context: context,
           shape: RoundedRectangleBorder(
@@ -176,7 +177,9 @@ class _CameraScreenState extends State<CameraScreen> {
           ),
           builder: (context) {
             return CustomBottomSheet(
-                aircraft: scannedAircrafts.length > 0? scannedAircrafts.first : null , flightInfo: scannedFlightInfo);
+                aircraft:
+                    scannedAircrafts.length > 0 ? scannedAircrafts.first : null,
+                flightInfo: scannedFlightInfo);
           }).whenComplete(() {
         modalIsOpen = false;
       });
@@ -205,14 +208,13 @@ class _CameraScreenState extends State<CameraScreen> {
     var status = await Permission.camera.status;
 
     if (mounted) {
-      if (status.isUndetermined || status.isDenied) {
-        setState(() {
-          gotCameraPermission = false;
-        });
-      }
       if (status.isGranted) {
         setState(() {
           gotCameraPermission = true;
+        });
+      } else {
+        setState(() {
+          gotCameraPermission = false;
         });
       }
     }

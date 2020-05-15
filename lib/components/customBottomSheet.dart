@@ -190,33 +190,34 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                         ? CustomListTile(LineIcons.angle_double_up,
                             verticalVelocity, 'Vertical Velocity')
                         : Container(),
-                    Center(
-                        child: Column(
-                      children: <Widget>[
-                        SizedBox(
-                          height: 15.0,
-                        ),
-                        Text('Additional information'),
-                        Divider(
-                          color: Colors.black,
-                          indent: 100.0,
-                          endIndent: 100.0,
-                          thickness: 1,
-                        ),
-                      ],
-                    )),
                     widget.aircraftInfo != null
                         ? Column(
                             children: <Widget>[
+                              Center(
+                                  child: Column(
+                                children: <Widget>[
+                                  SizedBox(
+                                    height: 15.0,
+                                  ),
+                                  Text('Additional information'),
+                                  Divider(
+                                    color: Colors.black,
+                                    indent: 100.0,
+                                    endIndent: 100.0,
+                                    thickness: 1,
+                                  ),
+                                ],
+                              )),
                               CustomListTile(Icons.airplanemode_active,
                                   widget.aircraftInfo.model, 'Model'),
-                                  CustomListTile(
-                                  LineIcons.fighter_jet,
-                                  widget.aircraftInfo.type,
-                                  'Type'),
-                                   CustomListTile(
+                              CustomListTile(LineIcons.fighter_jet,
+                                  widget.aircraftInfo.type, 'Type'),
+                              CustomListTile(
                                   LineIcons.tachometer,
-                                  widget.aircraftInfo.engines.count.toString() + ' x ' + widget.aircraftInfo.engines.type + ' engines',
+                                  widget.aircraftInfo.engines.count.toString() +
+                                      ' x ' +
+                                      widget.aircraftInfo.engines.type +
+                                      ' engines',
                                   'Engines'),
                               CustomListTile(FontAwesomeIcons.addressCard,
                                   widget.aircraftInfo.owner, 'Airline'),
@@ -224,7 +225,6 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                                   LineIcons.industry,
                                   widget.aircraftInfo.manufacturer.name,
                                   'Manufacturer'),
-                                  
                             ],
                           )
                         : SizedBox(),

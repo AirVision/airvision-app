@@ -45,7 +45,8 @@ class Api {
     );
 
     if (responseData.statusCode == 200) {
-      var tagObjsJson = jsonDecode(responseData.body)['data'] as List;
+
+      var tagObjsJson = jsonDecode(responseData.body)['data']['states'] as List;
       List<AircraftState> aircrafts = tagObjsJson
           .map((tagJson) => AircraftState.fromJson(tagJson))
           .toList();

@@ -78,20 +78,22 @@ class _MapScreenState extends State<MapScreen> {
     _timerisActive = true;
     double _timerValue = 300;
     const oneMiliSec = const Duration(milliseconds: 100);
-    _timer = new Timer.periodic(
-      oneMiliSec,
-      (Timer timer) => setState(
-        () {
-          if (_timerValue < 100) {
-            updateAircrafts();
-            _timerisActive = false;
-            timer.cancel();
-          } else {
-            _timerValue = _timerValue - 100;
-          }
-        },
-      ),
-    );
+    if (mounted) {
+      _timer = new Timer.periodic(
+        oneMiliSec,
+        (Timer timer) => setState(
+          () {
+            if (_timerValue < 100) {
+              updateAircrafts();
+              _timerisActive = false;
+              timer.cancel();
+            } else {
+              _timerValue = _timerValue - 100;
+            }
+          },
+        ),
+      );
+    }
   }
 
   void updateMakerSize(zoom) async {
@@ -179,7 +181,7 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   // Gets additional aircraft information
-  Future<void> getAircraftInfo() async{
+  Future<void> getAircraftInfo() async {
     aircraftInfo = await _api.getSpecificAircraftInfo(selectedMarker.value);
   }
 
@@ -194,7 +196,10 @@ class _MapScreenState extends State<MapScreen> {
           ),
           builder: (context) {
             return CustomBottomSheet(
-                aircraft: selectedAircraft, flightInfo: selectedFlightInfo,aircraftInfo: aircraftInfo,);
+              aircraft: selectedAircraft,
+              flightInfo: selectedFlightInfo,
+              aircraftInfo: aircraftInfo,
+            );
           }).whenComplete(() {
         modalIsOpen = false;
       });
@@ -272,7 +277,7 @@ class _MapScreenState extends State<MapScreen> {
                 rotation:
                     aircraft.heading != null ? (aircraft.heading - 90) : null,
                 onTap: () async {
-                    markers.removeWhere((id, marker) => id.value == "airport");
+                  markers.removeWhere((id, marker) => id.value == "airport");
                   selectedAircraft = null;
                   selectedFlightInfo = null;
                   if (selectedMarker != markerId) _polyline.clear();
@@ -281,7 +286,7 @@ class _MapScreenState extends State<MapScreen> {
                   await updateAircrafts().catchError((e) {});
                   await getAircraftState().catchError((e) {});
                   await getFlightInformation().catchError((e) {});
-                  await getAircraftInfo().catchError((e)  {});
+                  await getAircraftInfo().catchError((e) {});
                   if (selectedFlightInfo != null) updateWaypoints();
                   openInformationModal();
                 });

@@ -113,7 +113,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       height: 6.0,
                     ),
                     ToggleSwitch(
-                      minWidth: 120.0,
+                      
                       initialLabelIndex: selectedSpeedSystem,
                       activeBgColor: Theme.of(context).primaryColor,
                       activeTextColor: Colors.white,
