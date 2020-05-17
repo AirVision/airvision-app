@@ -14,10 +14,14 @@ class Api {
       int time,
       GeodeticPosition position,
       Quaternion rotation,
+      double rotationAccuracy,
       Vector2 fov,
       List aircraftPosition,
       List aircraftSize) async {
     Map<String, String> headers = {'Content-Type': 'application/json'};
+
+    // Send null if it's unsupported
+    var sensorAccuracy = rotationAccuracy == -1 ? null : rotationAccuracy;
 
     String body = '''{
       "time": $time,
@@ -28,6 +32,7 @@ class Api {
         ${rotation.z},
         ${rotation.w}
       ],
+      "rotation_accuracy": $sensorAccuracy,
       "fov": [
         ${fov.x},
         ${fov.y}

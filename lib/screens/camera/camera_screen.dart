@@ -137,9 +137,9 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
   Future<void> getScannedAircrafts(
-      time, _position, rotation, fov, aircraftPosition, aircraftSize) async {
+      time, _position, rotation, rotationAccuracy, fov, aircraftPosition, aircraftSize) async {
     scannedAircrafts = await _api.getVisibleAircraft(
-        time, _position, rotation, fov, aircraftPosition, aircraftSize);
+        time, _position, rotation, rotationAccuracy, fov, aircraftPosition, aircraftSize);
   }
 
   Future<void> getFlightInformation() async {
@@ -153,6 +153,7 @@ class _CameraScreenState extends State<CameraScreen> {
       var time = DateTime.now().secondsSinceEpoch;
       var fov = await cameras[0].getFov();
       var _rotation = await _orientationService.getQuaternion();
+      var _rotationAccuracy = await _orientationService.getEstimatedAccuracy();
 
       var _x = _recognitions[0]["rect"]["x"];
       var _w = _recognitions[0]["rect"]["w"];
@@ -162,9 +163,9 @@ class _CameraScreenState extends State<CameraScreen> {
       var aircraftPosition = [_x + (_w / 2), _y + (_h / 2)];
       var aircraftSize = [_w, _h];
 
-      await getScannedAircrafts(
-              time, _position, _rotation, fov, aircraftPosition, aircraftSize)
-          .catchError((e) {});
+      await getScannedAircrafts(time, _position, _rotation,
+          _rotationAccuracy, fov, aircraftPosition, aircraftSize
+      ).catchError((e) {});
 
       if (scannedAircrafts.length > 0)
         await getFlightInformation().catchError((e) {});
