@@ -17,4 +17,10 @@ class OrientationService {
     List<double> values = await _platform.invokeMethod('getQuaternion');
     return Quaternion(values[0], values[1], values[2], values[3]);
   }
+
+  /// Gets the estimated accuracy in
+  /// degrees. Is -1 if it is unavailable.
+  Future<double> getEstimatedAccuracy() async {
+    return await _platform.invokeMethod('getEstimatedAccuracy');
+  }
 }

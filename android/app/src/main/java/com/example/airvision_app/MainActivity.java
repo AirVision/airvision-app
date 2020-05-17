@@ -28,6 +28,7 @@ public class MainActivity extends FlutterActivity implements SensorEventListener
     private Sensor rotationSensor;
     private boolean running;
 
+    private double estimatedSensorAccuracy = -1;
     private final float[] quaternionWXYZ = new float[4];
 
     public MainActivity() {
@@ -94,6 +95,9 @@ public class MainActivity extends FlutterActivity implements SensorEventListener
             case "getQuaternion":
                 getOrientationQuaternion(result);
                 break;
+            case "getEstimatedAccuracy":
+                getEstimatedAccuracy(result);
+                break;
             case "start":
                 startOrientationService(result);
                 break;
@@ -113,6 +117,10 @@ public class MainActivity extends FlutterActivity implements SensorEventListener
         quaternion[2] = this.quaternionWXYZ[3];
         quaternion[3] = this.quaternionWXYZ[0];
         result.success(quaternion);
+    }
+
+    private void getEstimatedAccuracy(@NonNull MethodChannel.Result result) {
+        result.success(this.estimatedSensorAccuracy);
     }
 
     private void startOrientationService(@NonNull MethodChannel.Result result) {
@@ -135,9 +143,16 @@ public class MainActivity extends FlutterActivity implements SensorEventListener
         result.success(true);
     }
 
+    private static final int ACCURACY_INDEX = 4;
+
     @Override
     public void onSensorChanged(@NonNull SensorEvent event) {
         SensorManager.getQuaternionFromVector(this.quaternionWXYZ, event.values);
+
+        if (event.values.length > ACCURACY_INDEX) {
+            final double accuracy = event.values[ACCURACY_INDEX];
+            this.estimatedSensorAccuracy = accuracy == -1 ? -1 : Math.toDegrees(accuracy);
+        }
     }
 
     @Override
