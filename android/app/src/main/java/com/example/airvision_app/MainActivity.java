@@ -143,12 +143,14 @@ public class MainActivity extends FlutterActivity implements SensorEventListener
         result.success(true);
     }
 
+    private static final int ACCURACY_INDEX = 4;
+
     @Override
     public void onSensorChanged(@NonNull SensorEvent event) {
         SensorManager.getQuaternionFromVector(this.quaternionWXYZ, event.values);
 
-        if (event.values.length >= 4) {
-            final double accuracy = event.values[3];
+        if (event.values.length > ACCURACY_INDEX) {
+            final double accuracy = event.values[ACCURACY_INDEX];
             this.estimatedSensorAccuracy = accuracy == -1 ? -1 : Math.toDegrees(accuracy);
         }
     }
