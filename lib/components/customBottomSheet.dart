@@ -93,7 +93,6 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
             verticalVelocity =
                 (widget.aircraft.verticalRate * 1.94384).toStringAsFixed(2) +
                     ' kt';
-
           break;
       }
     }
@@ -167,10 +166,10 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                             widget.aircraft.position.length == 3
                         ? CustomListTile(
                             LineIcons.globe,
-                            (widget.aircraft.position[0].toStringAsFixed(3) +
-                                ', ' +
-                                widget.aircraft.position[1].toStringAsFixed(3) +
-                                ', ' +
+                            ('lat: ' + widget.aircraft.position[0].toStringAsFixed(2) +
+                                '° lng: ' +
+                                widget.aircraft.position[1].toStringAsFixed(2) +
+                                '° alt: ' +
                                 widget.aircraft.position[2].toStringAsFixed(1) +
                                 'm'),
                             'Position')
@@ -183,12 +182,12 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                           ),
                     widget.aircraft.velocity != null
                         ? CustomListTile(
-                            LineIcons.space_shuttle, velocity, 'Velocity')
+                            LineIcons.space_shuttle, velocity, 'Ground speed')
                         : Container(),
                     widget.aircraft.verticalRate != null &&
                             widget.aircraft.verticalRate != 0
                         ? CustomListTile(LineIcons.angle_double_up,
-                            verticalVelocity, 'Vertical Velocity')
+                            verticalVelocity, 'Vertical speed')
                         : Container(),
                     widget.aircraftInfo != null
                         ? Column(

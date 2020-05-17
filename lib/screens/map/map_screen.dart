@@ -280,6 +280,8 @@ class _MapScreenState extends State<MapScreen> {
                   markers.removeWhere((id, marker) => id.value == "airport");
                   selectedAircraft = null;
                   selectedFlightInfo = null;
+                  aircraftInfo = null;
+
                   if (selectedMarker != markerId) _polyline.clear();
                   selectedMarker = markerId;
 
@@ -290,9 +292,11 @@ class _MapScreenState extends State<MapScreen> {
                   if (selectedFlightInfo != null) updateWaypoints();
                   openInformationModal();
                 });
-            setState(() {
-              markers[marker.markerId] = marker;
-            });
+            if (mounted) {
+              setState(() {
+                markers[marker.markerId] = marker;
+              });
+            }
           }
         });
         setState(() {

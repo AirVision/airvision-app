@@ -1,4 +1,7 @@
 import 'dart:async';
+import 'dart:developer';
+import 'package:air_vision/models/aircraftInfo.dart';
+import 'package:air_vision/screens/camera/info_screen.dart';
 import 'package:air_vision/util/camera/camera.dart';
 import 'package:air_vision/components/customBottomSheet.dart';
 import 'package:air_vision/models/aircraftState.dart';
@@ -26,7 +29,7 @@ class _CameraScreenState extends State<CameraScreen> {
   GeodeticPosition _position = GeodeticPosition.zero();
 
   OrientationService _orientationService = OrientationService();
-  List<dynamic> _recognitions;
+  List<dynamic> _recognitions = [];
   StreamSubscription<LocationData> _locationSubscription;
 
   Api _api = Api();
@@ -50,6 +53,7 @@ class _CameraScreenState extends State<CameraScreen> {
 
   List<AircraftState> scannedAircrafts = [];
   FlightInfo scannedFlightInfo;
+  AircraftInfo aircraftInfo;
 
   @override
   void initState() {
@@ -140,6 +144,8 @@ class _CameraScreenState extends State<CameraScreen> {
       time, _position, rotation, fov, aircraftPosition, aircraftSize) async {
     scannedAircrafts = await _api.getVisibleAircraft(
         time, _position, rotation, fov, aircraftPosition, aircraftSize);
+
+    log(scannedAircrafts.first.toString());
   }
 
   Future<void> getFlightInformation() async {
@@ -147,27 +153,42 @@ class _CameraScreenState extends State<CameraScreen> {
         await _api.getSpecificFlightInfo(scannedAircrafts.first.icao24);
   }
 
-  scanAirplane(previewH, previewW, screenH, screenW) async {
+  // Gets additional aircraft information
+  Future<void> getAircraftInfo() async {
+    aircraftInfo =
+        await _api.getSpecificAircraftInfo(scannedAircrafts.first.icao24);
+  }
+
+  scanAirplane(previewH, previewW, screenH, screenW, {tapX, tapY}) async {
     if (!modalIsOpen) {
       modalIsOpen = true;
       var time = DateTime.now().secondsSinceEpoch;
       var fov = await cameras[0].getFov();
       var _rotation = await _orientationService.getQuaternion();
 
-      var _x = _recognitions[0]["rect"]["x"];
-      var _w = _recognitions[0]["rect"]["w"];
-      var _y = _recognitions[0]["rect"]["y"];
-      var _h = _recognitions[0]["rect"]["h"];
+      var _x;
+      var _y;
+      var _w = 0.5;
+      var _h = 0.5;
+      var aircraftPosition;
 
-      var aircraftPosition = [_x + (_w / 2), _y + (_h / 2)];
+      if (_recognitions.length > 0) {
+        _x = _recognitions[0]["rect"]["x"];
+        _w = _recognitions[0]["rect"]["w"];
+        _y = _recognitions[0]["rect"]["y"];
+        _h = _recognitions[0]["rect"]["h"];
+        aircraftPosition = [_x + (_w / 2), _y + (_h / 2)];
+      } else {
+        aircraftPosition = [tapX, tapY];
+      }
+
       var aircraftSize = [_w, _h];
-
       await getScannedAircrafts(
               time, _position, _rotation, fov, aircraftPosition, aircraftSize)
           .catchError((e) {});
 
-      if (scannedAircrafts.length > 0)
-        await getFlightInformation().catchError((e) {});
+      await getFlightInformation().catchError((e) {});
+      await getAircraftInfo().catchError((e) {});
 
       showModalBottomSheet(
           context: context,
@@ -179,9 +200,12 @@ class _CameraScreenState extends State<CameraScreen> {
             return CustomBottomSheet(
                 aircraft:
                     scannedAircrafts.length > 0 ? scannedAircrafts.first : null,
-                flightInfo: scannedFlightInfo);
+                flightInfo: scannedFlightInfo,
+                aircraftInfo: aircraftInfo);
           }).whenComplete(() {
         modalIsOpen = false;
+        _recognitions = [];
+        scannedAircrafts = [];
       });
     }
   }
@@ -231,13 +255,50 @@ class _CameraScreenState extends State<CameraScreen> {
             body: gotCameraPermission
                 ? Stack(
                     children: [
-                      CameraPreview(controller),
+                      GestureDetector(
+                          onTapDown: (TapDownDetails details) {
+                            _recognitions = [];
+                            scannedAircrafts = [];
+                            scanAirplane(
+                                math.max(_imageHeight, _imageWidth),
+                                math.min(_imageHeight, _imageWidth),
+                                screen.height,
+                                screen.width,
+                                tapX: details.globalPosition.dx,
+                                tapY: details.globalPosition.dy);
+                          },
+                          child: CameraPreview(controller)),
                       DrawBox(
                           _recognitions == null ? [] : _recognitions,
                           math.max(_imageHeight, _imageWidth),
                           math.min(_imageHeight, _imageWidth),
                           screen.height,
                           screen.width),
+                      SafeArea(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(0, 20, 20, 0),
+                          child: Align(
+                            alignment: Alignment.topRight,
+                            child: Container(
+                              width: 50.0,
+                              height: 50.0,
+                              color: Colors.white,
+                              child: IconButton(
+                                icon: Icon(
+                                  Icons.info,
+                                  size: 30,
+                                ),
+                                onPressed: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => InfoScreen()));
+                                },
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
                       Padding(
                         padding: const EdgeInsets.only(bottom: 40.0),
                         child: Align(

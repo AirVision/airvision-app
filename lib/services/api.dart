@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:air_vision/models/aircraftInfo.dart';
 import 'package:air_vision/models/flightInfo.dart';
 import 'package:air_vision/models/aircraftState.dart';
@@ -134,7 +135,6 @@ class Api {
     if (responseData.statusCode == 200) {
       var tagObjsJson = jsonDecode(responseData.body)["data"];
       AircraftInfo flight = AircraftInfo.fromJson(tagObjsJson);
-      print(tagObjsJson);
       return flight;
     } else {
       return jsonDecode(responseData.body)['error']['message'];
