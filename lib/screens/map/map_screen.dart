@@ -13,6 +13,7 @@ import 'dart:async';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:location/location.dart';
 import 'package:air_vision/components/customBottomSheet.dart';
+import 'package:connectivity/connectivity.dart';
 
 //Map constansts
 const double CAMERA_ZOOM = 10;
@@ -59,10 +60,15 @@ class _MapScreenState extends State<MapScreen> {
   AircraftState selectedAircraft;
   AircraftInfo aircraftInfo;
 
+  StreamSubscription subscription;
+
   @override
   void initState() {
     super.initState();
     setUserLocation();
+    subscription = Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
+    // Got a new connectivity status!
+    });
     rootBundle.loadString('assets/mapStyle2.txt').then((string) {
       _mapStyle = string;
     });
@@ -71,6 +77,7 @@ class _MapScreenState extends State<MapScreen> {
   @override
   void dispose() {
     _timer.cancel();
+    subscription.cancel();
     super.dispose();
   }
 

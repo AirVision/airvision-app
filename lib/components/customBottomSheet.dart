@@ -186,7 +186,8 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                         : Container(),
                     widget.aircraft.verticalRate != null &&
                             widget.aircraft.verticalRate != 0
-                        ? CustomListTile(LineIcons.angle_double_up,
+                        ? CustomListTile(
+                          LineIcons.angle_double_up,
                             verticalVelocity, 'Vertical speed')
                         : Container(),
                     widget.aircraftInfo != null

@@ -173,8 +173,8 @@ class Api {
 
     String body = '''{
        "bounds": {
-        "min": 0,
-        "max": 0
+        "min": [0,0],
+        "max": [1,1]
         }
       }
       ''';

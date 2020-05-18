@@ -10,12 +10,13 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <application
         android:name="io.flutter.app.FlutterApplication"
-        android:label="Airvision"
+        android:label="AirVision"
         android:icon="@mipmap/ic_launcher">
          <meta-data android:name="com.google.android.geo.API_KEY"
                android:value="AIzaSyAuBhcV_sK9MaF2ooh-c_h0oU0CIa1_6u4"/>
         <activity
             android:name=".MainActivity"
+            android:screenOrientation="portrait"
             android:launchMode="singleTop"
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"

@@ -284,7 +284,7 @@ class _CameraScreenState extends State<CameraScreen> {
                               color: Colors.white,
                               child: IconButton(
                                 icon: Icon(
-                                  Icons.info,
+                                  Icons.help,
                                   size: 30,
                                 ),
                                 onPressed: () {

@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:developer';
+import 'package:air_vision/services/api.dart';
 import 'package:air_vision/util/math/euler_angles.dart';
 import 'package:air_vision/services/orientation_service.dart';
 import 'package:air_vision/services/time_service.dart';
@@ -6,6 +8,7 @@ import 'package:air_vision/util/math/quaternion.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:location/location.dart';
 import 'package:vector_math/vector_math.dart' show Quaternion, degrees;
@@ -33,6 +36,7 @@ class _DebugScreenState extends State<DebugScreen> {
 
   bool loading = false;
   EulerAngles _rotation = EulerAngles.zero();
+  Api _api = Api();
 
   Future<void> _updateDeviceOrientation() async {
     try {
@@ -252,6 +256,25 @@ class _DebugScreenState extends State<DebugScreen> {
                     onTap: () {
                       setState(() {
                         loading = true;
+                        _api.testConnection().then((r) {
+                          log(r.toString());
+                          loading = false;
+                          var message = "Connection failed";
+                          Color color = Colors.red;
+                          if (r) {
+                            message = "Connection succesful";
+                            color = Colors.green;
+                          }
+
+                          Fluttertoast.showToast(
+                              msg: message,
+                              toastLength: Toast.LENGTH_SHORT,
+                              gravity: ToastGravity.CENTER,
+                              timeInSecForIosWeb: 1,
+                              backgroundColor: color,
+                              textColor: Colors.white,
+                              fontSize: 16.0);
+                        });
                       });
                     },
                     child: Container(
