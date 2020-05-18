@@ -105,7 +105,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       height: 24.0,
                     ),
                     Text(
-                      'Preffered measurement of speed',
+                      'Preferred measurement of speed',
                       style: TextStyle(
                           fontSize: 16.0, fontWeight: FontWeight.w500),
                     ),
