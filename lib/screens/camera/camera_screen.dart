@@ -167,23 +167,26 @@ class _CameraScreenState extends State<CameraScreen> {
 
       var _x;
       var _y;
-      var _w = 0.5;
-      var _h = 0.5;
-      var aircraftPosition;
+      var _w = 0.2;
+      var _h = 0.2;
 
       if (_recognitions.length > 0) {
         _x = _recognitions[0]["rect"]["x"];
         _w = _recognitions[0]["rect"]["w"];
         _y = _recognitions[0]["rect"]["y"];
         _h = _recognitions[0]["rect"]["h"];
-        aircraftPosition = [_x + (_w / 2), _y + (_h / 2)];
+        _x = _x + (_w / 2);
+        _y = _y + (_h / 2);
       } else {
-        aircraftPosition = [tapX, tapY];
+        _x = tapX / screenW;
+        _y = tapY / screenH;
       }
 
-      var aircraftSize = [_w, _h];
+      var position = [_x, _y];
+      var size = [_w, _h];
+
       await getScannedAircrafts(time, _position, _rotation,
-          _rotationAccuracy, fov, aircraftPosition, aircraftSize
+          _rotationAccuracy, fov, position, size
       ).catchError((e) {});
 
       await getFlightInformation().catchError((e) {});
