@@ -72,7 +72,7 @@ public class MainActivity extends FlutterActivity implements SensorEventListener
             final float[] focalLengths = info.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS);
             if (sensorSize == null || focalLengths == null)
                 throw new IllegalStateException("Essential camera info isn't available.");
-            // TODO: What to do if there are multiple focal lengths?
+
             final float focalLength = focalLengths[0];
 
             // Short edge of the screen
